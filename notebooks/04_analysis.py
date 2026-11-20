@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 03 – 2026 vs 2023 analysis
+# # 04 – 2026 vs 2023 analysis
 # Like-for-like: **ordinary places only** (`advance` + `election_day`), since 2026 is preliminary
 # and has no special votes. Change `FOCUS` to look at any party.
 

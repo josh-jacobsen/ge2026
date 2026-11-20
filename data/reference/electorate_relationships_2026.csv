@@ -1,0 +1,72 @@
+roll,electorate_2026,relationship,primary_2023,primary_share,same_name_share,sources,matched_vote_coverage,comparable
+general,Auckland Central,"continuing, boundaries changed",Auckland Central,78.3,78.3,Auckland Central 78%; Mt Albert 22%,64.1,False
+general,Banks Peninsula,continuing,Banks Peninsula,100.0,100.0,Banks Peninsula 100%,79.8,True
+general,Botany,"continuing, boundaries changed",Botany,75.2,75.2,Botany 75%,52.3,False
+general,Christchurch Central,continuing,Christchurch Central,100.0,100.0,Christchurch Central 100%,61.0,True
+general,Christchurch East,continuing,Christchurch East,100.0,100.0,Christchurch East 100%,43.6,True
+general,Coromandel,continuing,Coromandel,100.0,100.0,Coromandel 100%,82.7,True
+general,Dunedin,continuing,Dunedin,100.0,100.0,Dunedin 100%,67.5,True
+general,East Cape,successor of East Coast,East Coast,100.0,0.0,East Coast 100%,74.3,False
+general,East Coast Bays,continuing,East Coast Bays,89.9,89.9,East Coast Bays 90%,58.7,True
+general,Epsom,continuing,Epsom,100.0,100.0,Epsom 100%,46.7,True
+general,Glendene,merged/redrawn from Te Atatū + Kelston,Te Atatū,68.8,0.0,Te Atatū 69%; Kelston 25%,52.3,False
+general,Hamilton East,continuing,Hamilton East,100.0,100.0,Hamilton East 100%,91.8,True
+general,Hamilton West,continuing,Hamilton West,100.0,100.0,Hamilton West 100%,79.5,True
+general,Henderson,merged/redrawn from Te Atatū + Upper Harbour,Te Atatū,61.5,0.0,Te Atatū 61%; Upper Harbour 30%,53.1,False
+general,Hutt South,continuing,Hutt South,91.6,91.6,Hutt South 92%,86.2,True
+general,Ilam,continuing,Ilam,99.2,99.2,Ilam 99%,72.6,True
+general,Invercargill,continuing,Invercargill,98.5,98.5,Invercargill 98%,75.5,True
+general,Kaikōura,continuing,Kaikōura,100.0,100.0,Kaikōura 100%,73.0,True
+general,Kaipara ki Mahurangi,continuing,Kaipara ki Mahurangi,97.5,97.5,Kaipara ki Mahurangi 98%,65.6,True
+general,Kapiti,merged/redrawn from Mana + Ōtaki,Mana,52.0,0.0,Mana 52%; Ōtaki 48%,81.7,False
+general,Kenepuru,merged/redrawn from Ōhāriu + Mana,Ōhāriu,52.8,0.0,Ōhāriu 53%; Mana 47%,46.6,False
+general,Manurewa,continuing,Manurewa,97.6,97.6,Manurewa 98%,78.1,True
+general,Maungakiekie,continuing,Maungakiekie,88.4,88.4,Maungakiekie 88%,79.9,True
+general,Mt Albert,continuing,Mt Albert,83.9,83.9,Mt Albert 84%,33.7,True
+general,Mt Maunganui,successor of Bay of Plenty,Bay of Plenty,91.7,0.0,Bay of Plenty 92%,72.8,False
+general,Mt Roskill,"continuing, boundaries changed",Mt Roskill,56.0,56.0,Mt Roskill 56%; New Lynn 44%,41.9,False
+general,Māngere,continuing,Māngere,94.4,94.4,Māngere 94%,72.7,True
+general,Napier,continuing,Napier,97.2,97.2,Napier 97%,76.2,True
+general,Nelson,continuing,Nelson,100.0,100.0,Nelson 100%,61.8,True
+general,New Plymouth,continuing,New Plymouth,100.0,100.0,New Plymouth 100%,80.9,True
+general,North Shore,continuing,North Shore,96.7,96.7,North Shore 97%,90.2,True
+general,Northcote,continuing,Northcote,100.0,100.0,Northcote 100%,67.8,True
+general,Northland,continuing,Northland,100.0,100.0,Northland 100%,92.3,True
+general,Pakuranga,continuing,Pakuranga,85.7,85.7,Pakuranga 86%,58.7,True
+general,Palmerston North,continuing,Palmerston North,89.7,89.7,Palmerston North 90%,72.5,True
+general,Papakura,continuing,Papakura,96.8,96.8,Papakura 97%,76.9,True
+general,Port Waikato,continuing,Port Waikato,100.0,100.0,Port Waikato 100%,76.9,True
+general,Rangitata,continuing,Rangitata,100.0,100.0,Rangitata 100%,82.3,True
+general,Rangitīkei,"continuing, boundaries changed",Rangitīkei,75.9,75.9,Rangitīkei 76%; Ōtaki 24%,81.9,False
+general,Remutaka,continuing,Remutaka,98.1,98.1,Remutaka 98%,74.6,True
+general,Rotorua,continuing,Rotorua,94.2,94.2,Rotorua 94%,78.6,True
+general,Selwyn,continuing,Selwyn,100.0,100.0,Selwyn 100%,54.6,True
+general,Southland,continuing,Southland,100.0,100.0,Southland 100%,69.9,True
+general,Taieri,continuing,Taieri,100.0,100.0,Taieri 100%,71.8,True
+general,Takanini,continuing,Takanini,94.5,94.5,Takanini 95%,53.8,True
+general,Taranaki-King Country,continuing,Taranaki-King Country,97.1,97.1,Taranaki-King Country 97%,85.0,True
+general,Taupō,continuing,Taupō,100.0,100.0,Taupō 100%,69.5,True
+general,Tauranga,continuing,Tauranga,82.8,82.8,Tauranga 83%,34.7,True
+general,Tukituki,continuing,Tukituki,100.0,100.0,Tukituki 100%,79.9,True
+general,Tāmaki,continuing,Tāmaki,98.0,98.0,Tāmaki 98%,85.2,True
+general,Upper Harbour,continuing,Upper Harbour,81.5,81.5,Upper Harbour 81%,85.3,True
+general,Waikato,continuing,Waikato,100.0,100.0,Waikato 100%,67.1,True
+general,Waimakariri,continuing,Waimakariri,100.0,100.0,Waimakariri 100%,22.8,True
+general,Wairarapa,continuing,Wairarapa,100.0,100.0,Wairarapa 100%,53.6,True
+general,Waitaki,continuing,Waitaki,100.0,100.0,Waitaki 100%,70.9,True
+general,Waitākere,merged/redrawn from New Lynn + Kelston,New Lynn,73.3,0.0,New Lynn 73%; Kelston 27%,57.9,False
+general,Wellington Bays,successor of Rongotai,Rongotai,91.0,0.0,Rongotai 91%,74.1,False
+general,Wellington North,merged/redrawn from Wellington Central + Ōhāriu,Wellington Central,55.0,0.0,Wellington Central 55%; Ōhāriu 45%,58.4,False
+general,West Coast-Tasman,continuing,West Coast-Tasman,100.0,100.0,West Coast-Tasman 100%,85.3,True
+general,Whanganui,continuing,Whanganui,94.4,94.4,Whanganui 94%,73.9,True
+general,Whangaparāoa,continuing,Whangaparāoa,100.0,100.0,Whangaparāoa 100%,68.3,True
+general,Whangārei,continuing,Whangārei,97.1,97.1,Whangārei 97%,50.8,True
+general,Wigram,continuing,Wigram,100.0,100.0,Wigram 100%,39.1,True
+general,Ōtāhuhu,successor of Panmure-Ōtāhuhu,Panmure-Ōtāhuhu,94.0,0.0,Panmure-Ōtāhuhu 94%,62.3,False
+maori,Hauraki-Waikato,continuing,Hauraki-Waikato,100.0,100.0,Hauraki-Waikato 100%,76.7,True
+maori,Ikaroa-Rāwhiti,continuing,Ikaroa-Rāwhiti,95.0,95.0,Ikaroa-Rāwhiti 95%,75.5,True
+maori,Te Tai Hauāuru,continuing,Te Tai Hauāuru,100.0,100.0,Te Tai Hauāuru 100%,72.4,True
+maori,Te Tai Tokerau,continuing,Te Tai Tokerau,100.0,100.0,Te Tai Tokerau 100%,66.3,True
+maori,Te Tai Tonga,continuing,Te Tai Tonga,100.0,100.0,Te Tai Tonga 100%,55.9,True
+maori,Tāmaki Makaurau,continuing,Tāmaki Makaurau,100.0,100.0,Tāmaki Makaurau 100%,61.5,True
+maori,Waiariki,continuing,Waiariki,100.0,100.0,Waiariki 100%,73.6,True

@@ -337,6 +337,45 @@ def checks(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return pd.concat(rows, ignore_index=True)
 
 
+TURNOUT_2023 = RAW / "ge2023" / "_turnout" / "ge2023_party_votes_and_turnout_by_electorate.csv"
+
+
+def load_turnout_2023() -> tuple[pd.DataFrame, dict[str, int]]:
+    """Commission turnout table: independent electorate-level totals (not derived from the place files).
+
+    Returns (per-electorate frame, {'general': n, 'maori': n, 'combined': n} valid-vote totals).
+    Columns: ordinary_valid (a), special_valid (b), valid_total (c), electors_on_roll (j), turnout_pct.
+    The (a)/(b) split uses the Commission's own ordinary/special definition, which does not map onto our
+    place_kind rows, so only valid_total is used for reconciliation.
+    """
+    with open(TURNOUT_2023, encoding="utf-8-sig", newline="") as fh:
+        rows = list(csv.reader(fh))
+    num = lambda v: int(v.replace(",", "")) if v.strip().replace(",", "").isdigit() else None
+    per, totals = [], {}
+    for r in rows:
+        if len(r) < 13 or num(r[3]) is None:
+            continue
+        name = r[0].strip()
+        if name.endswith("Totals"):
+            totals[{"General Electorate Totals": "general", "Māori Electorate Totals": "maori", "Combined Totals": "combined"}[name]] = num(r[3])
+        else:
+            per.append({"electorate": name, "ordinary_valid": num(r[1]), "special_valid": num(r[2]), "valid_total": num(r[3]),
+                        "electors_on_roll": num(r[10]), "turnout_pct": float(r[12])})
+    return pd.DataFrame(per), totals
+
+
+def checks_turnout_2023(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Second reconciliation: parsed 2023 electorate totals vs the independent Commission turnout table."""
+    off, _ = load_turnout_2023()
+    ours = (
+        tables["stg_party_votes"].query("election_year == 2023 and place_kind == 'total'")
+        .groupby("electorate")["votes"].sum().rename("staging_total")
+    )
+    d = off.set_index("electorate")[["valid_total"]].join(ours, how="outer")
+    d["diff"] = d["staging_total"] - d["valid_total"]
+    return d.reset_index()
+
+
 def write(tables: dict[str, pd.DataFrame]) -> None:
     STAGING.mkdir(parents=True, exist_ok=True)
     for name, df in tables.items():

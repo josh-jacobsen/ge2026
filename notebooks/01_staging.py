@@ -31,6 +31,25 @@ display(chk)
 assert (chk["diff"] == 0).all(), "staging does not reconcile with official totals"
 
 # %% [markdown]
+# ## Second check: independent 2023 electorate totals
+# The check above compares place rows to the total row *in the same file*, so it only proves the parser is
+# faithful. The Commission's separate turnout table (`data/raw/ge2023/_turnout/`) gives valid party votes per
+# electorate from a different publication, so a match here also confirms the source totals themselves.
+# (2026 has no equivalent table yet. Its check is internal only.)
+
+# %%
+chk2 = etl.checks_turnout_2023(tables)
+display(chk2[chk2["diff"] != 0] if (chk2["diff"] != 0).any() else chk2.describe().loc[["count", "min", "max"]])
+missing = chk2[chk2[["valid_total", "staging_total"]].isna().any(axis=1)]
+assert missing.empty, f"electorates missing from one side:\n{missing}"
+assert (chk2["diff"] == 0).all(), "staging totals differ from the Commission turnout table"
+
+_, nat = etl.load_turnout_2023()
+ours_nat = int(chk2["staging_total"].sum())
+print(f"{len(chk2)} electorates match; national valid party votes: staging {ours_nat:,} vs Commission {nat['combined']:,}")
+assert ours_nat == nat["combined"] == nat["general"] + nat["maori"]
+
+# %% [markdown]
 # ## What is in each election?
 # 2026 is **preliminary, ordinary votes only** (no special/overseas votes), so compare
 # `advance` + `election_day` rows only. 2023 includes special votes as separate `place_kind`s.

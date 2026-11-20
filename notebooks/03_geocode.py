@@ -1,5 +1,5 @@
 # %% [markdown]
-# # 02 – Geocode voting places
+# # 03 – Geocode voting places
 # Looks up coordinates with Nominatim (OpenStreetMap) for places not yet in `data/geo/geocode_cache.csv`.
 # Only public venue names/addresses are sent, at ~1 request/second, so a big batch takes a while;
 # progress is saved every 20 places and re-running resumes where it stopped.

@@ -1,0 +1,27 @@
+# Python / env
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS / editors
+.DS_Store
+.vscode/
+
+# Derived data: rebuilt by notebook 01 (118 MB of csv + parquet)
+data/staging/
+
+# Generated outputs: rebuilt by notebook 03
+data/geo/*.html
+
+# Raw-file housekeeping: byte-identical duplicate downloads parked by notebook 00
+data/raw/*/_duplicates/
+data/raw/**/*.renaming
+
+# Tracked on purpose:
+#   data/raw/        original Commission downloads (4.5 MB; the site blocks scripted downloads, so keep them)
+#   data/geo/geocode_cache.csv   ~1 hour of Nominatim lookups plus any manual lat/lon fixes

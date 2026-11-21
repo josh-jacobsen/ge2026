@@ -32,7 +32,7 @@ PARTY_ALIASES = {
     "Animal Justice Party ": "Animal Justice Party",
     "Animal Justice Party Aotearoa New Zealand": "Animal Justice Party",
     "Opportunity Party": "The Opportunities Party (TOP)",
-    "Conservative Party NZ": "New Conservatives",
+    "Conservative Party NZ": "New Conservatives",  # confirmed same party: 2026 name for the 2023 "New Conservatives"
 }
 
 

@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd, folium
 import matplotlib.pyplot as plt
 from branca.colormap import LinearColormap
-import places
+import places, maps
 
 ST = ROOT / "data/staging"
 FOCUS = "Green Party"
@@ -92,7 +92,7 @@ def share_map(df_by_year, party):
     mapped = pd.concat(df_by_year.values()).dropna(subset=["lat"])
     vmax = float(mapped.share.quantile(0.98))
     cmap = LinearColormap(["#f7fcf5", "#74c476", "#00441b"], vmin=0, vmax=vmax, caption=f"{party} share of party votes (%)")
-    m = folium.Map(location=[mapped.lat.mean(), mapped.lon.mean()], zoom_start=6 if BBOX is None else 11, tiles="OpenStreetMap")
+    m = maps.base_map([mapped.lat.mean(), mapped.lon.mean()], 6 if BBOX is None else 11)
     for year, d in df_by_year.items():
         layer = folium.FeatureGroup(name=str(year), show=(year == max(df_by_year)))
         for r in d.dropna(subset=["lat"]).itertuples():
@@ -149,7 +149,7 @@ display(sw.sort_values("swing").head(8)[["electorate_2026", "label_2026", "share
 s = in_bbox(sw)
 lim = float(np.ceil(s.swing.abs().quantile(0.95)))
 cm = LinearColormap(["#b2182b", "#f7f7f7", "#1b7837"], vmin=-lim, vmax=lim, caption=f"{FOCUS} swing 2023→2026 (pts)")
-m = folium.Map(location=[s.lat.mean(), s.lon.mean()], zoom_start=6 if BBOX is None else 11, tiles="OpenStreetMap")
+m = maps.base_map([s.lat.mean(), s.lon.mean()], 6 if BBOX is None else 11)
 for r in s.itertuples():
     folium.CircleMarker([r.lat, r.lon], radius=3 + np.sqrt(r.votes_2026) / 8, color="#333", weight=0.4, fill=True,
                         fill_color=cm(max(-lim, min(lim, r.swing))), fill_opacity=0.8,

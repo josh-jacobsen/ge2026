@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 sys.path.insert(0, str(ROOT / "src"))
 import pandas as pd, folium
-import geocode
+import geocode, maps
 
 # %% [markdown]
 # ## 1. What still needs geocoding?
@@ -44,7 +44,7 @@ display(geo[geo.lat.isna()][["voting_place_raw"]])
 
 # %%
 ok = geo.dropna(subset=["lat"])
-m = folium.Map(location=[ok.lat.mean(), ok.lon.mean()], zoom_start=6, tiles="OpenStreetMap")
+m = maps.base_map([ok.lat.mean(), ok.lon.mean()], 6)
 for r in ok.itertuples():
     folium.CircleMarker([r.lat, r.lon], radius=4, tooltip=r.voting_place_raw, popup=r.display_name).add_to(m)
 m

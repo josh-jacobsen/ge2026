@@ -1,6 +1,6 @@
 # NZ election analysis: 2026 vs 2023
 
-Voting-place level comparison for East Coast Bays, North Shore, Northcote and Upper Harbour.
+Voting-place level comparison.
 
 ## Setup
     uv sync

@@ -376,6 +376,26 @@ def checks_turnout_2023(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     return d.reset_index()
 
 
+NATIONAL_2026 = RAW / "ge2026" / "_turnout" / "ge2026_party_votes_national_preliminary.csv"
+
+
+def checks_party_totals_2026(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    """Independent 2026 check: sum of parsed electorate totals per party vs the published national party table.
+
+    The national table comes from the Commission's results page (preliminary, ordinary votes). Party names are
+    passed through clean_party() so spelling variants line up with staging.
+    """
+    pub = pd.read_csv(NATIONAL_2026)
+    pub["party"] = pub["party"].map(clean_party)
+    ours = (
+        tables["stg_party_votes"].query("election_year == 2026 and place_kind == 'total'")
+        .groupby("party")["votes"].sum().rename("staging_votes")
+    )
+    d = pub.set_index("party")[["party_votes"]].join(ours, how="outer")
+    d["diff"] = d["staging_votes"] - d["party_votes"]
+    return d.reset_index()
+
+
 def write(tables: dict[str, pd.DataFrame]) -> None:
     STAGING.mkdir(parents=True, exist_ok=True)
     for name, df in tables.items():

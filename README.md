@@ -18,6 +18,15 @@ and pick the `.venv` kernel. Regenerate the ipynb after editing the .py: `uv run
 Raw data goes in `data/raw/ge2023/` (CSV) and `data/raw/ge2026/` (XLSX). CLI equivalents:
 `python src/etl.py --rename-only [--dry-run]`, `python src/etl.py`, `python src/geocode.py`.
 
+## Tests
+    uv run pytest
+
+Staging is rebuilt from `data/raw` and checked against the Commission's published national figures:
+`tests/test_national_2026.py` (17 party totals, 2,418,565 votes, 71 electorates, seat arithmetic) and
+`tests/test_national_2023.py` (72 electorates, national and general/Māori totals, every electorate total vs the
+turnout table). Expected figures live in `tests/data/` and `data/raw/*/_turnout/`. One 2023 test skips until the
+2023 national party table is saved as `data/raw/ge2023/_turnout/ge2023_party_votes_national.csv` (`party,party_votes`).
+
 ## Caveats
 - 2026 data is **preliminary, ordinary votes only**. Compare `advance` + `election_day` rows only.
 - Candidate -> party mapping exists for 2023 only (`stg_candidate_party`); 2026 needs adding.

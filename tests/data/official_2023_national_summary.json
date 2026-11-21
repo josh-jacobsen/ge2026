@@ -1,0 +1,9 @@
+{
+  "source": "Electoral Commission 2023, party-votes-and-turnout-by-electorate.csv (Combined / General / Māori totals rows)",
+  "total_party_votes": 2851211,
+  "general_party_votes": 2659474,
+  "maori_party_votes": 191737,
+  "electorates": 72,
+  "general_electorates": 65,
+  "maori_electorates": 7
+}

@@ -44,7 +44,7 @@ display(geo[geo.lat.isna()][["voting_place_raw"]])
 
 # %%
 ok = geo.dropna(subset=["lat"])
-m = folium.Map(location=[ok.lat.mean(), ok.lon.mean()], zoom_start=6, tiles="cartodbpositron")
+m = folium.Map(location=[ok.lat.mean(), ok.lon.mean()], zoom_start=6, tiles="OpenStreetMap")
 for r in ok.itertuples():
     folium.CircleMarker([r.lat, r.lon], radius=4, tooltip=r.voting_place_raw, popup=r.display_name).add_to(m)
 m

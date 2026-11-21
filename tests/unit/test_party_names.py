@@ -14,10 +14,3 @@ def test_opportunity_party_is_top():
 
 def test_animal_justice_spellings_are_one_party():
     assert etl.clean_party("Animal Justice Party Aotearoa New Zealand") == etl.clean_party("Animal Justice Party ")
-
-
-def test_staged_parties_use_canonical_names(party_votes):
-    parties = set(party_votes.party)
-    assert "Conservative Party NZ" not in parties
-    assert "Opportunity Party" not in parties
-    assert not any(p != " ".join(p.split()) for p in parties), "party names must be whitespace-normalised"

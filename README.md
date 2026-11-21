@@ -19,13 +19,21 @@ Raw data goes in `data/raw/ge2023/` (CSV) and `data/raw/ge2026/` (XLSX). CLI equ
 `python src/etl.py --rename-only [--dry-run]`, `python src/etl.py`, `python src/geocode.py`.
 
 ## Tests
-    uv run pytest
+    uv run pytest                          # everything (~15 s)
+    uv run pytest tests/unit               # fast logic tests, no raw data needed (~0.1 s)
+    uv run pytest tests/official_results   # staging vs the Commission's published figures
 
-Staging is rebuilt from `data/raw` and checked against the Commission's published national figures:
-`tests/test_national_2026.py` (17 party totals, 2,418,565 votes, 71 electorates, seat arithmetic) and
-`tests/test_national_2023.py` (72 electorates, national and general/Māori totals, every electorate total vs the
-turnout table). Expected figures live in `tests/data/` and `data/raw/*/_turnout/`. One 2023 test skips until the
-2023 national party table is saved as `data/raw/ge2023/_turnout/ge2023_party_votes_national.csv` (`party,party_votes`).
+    tests/
+      unit/                  venue aggregation, distance matching, party-name decisions
+      official_results/      rebuilds staging from data/raw and checks it against official figures
+        test_2026_national.py    17 party totals, 2,418,565 votes, 71 electorates, seat arithmetic
+        test_2023_national.py    72 electorates, national and general/Māori totals, every electorate vs the turnout table
+        test_staged_party_names.py
+        data/                    expected official figures (JSON); more in data/raw/*/_turnout/
+        conftest.py              builds the staging tables once per run
+
+One 2023 test skips until the 2023 national party table is saved as
+`data/raw/ge2023/_turnout/ge2023_party_votes_national.csv` (`party,party_votes`).
 
 ## Caveats
 - 2026 data is **preliminary, ordinary votes only**. Compare `advance` + `election_day` rows only.

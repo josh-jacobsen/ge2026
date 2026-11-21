@@ -1,4 +1,4 @@
-"""Shared fixtures. `tables` rebuilds the staging tables from data/raw (a few seconds, once per session)."""
+"""Fixtures for checks against official results. `tables` rebuilds staging from data/raw (a few seconds, once per session)."""
 
 import json
 import sys
@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+DATA = Path(__file__).resolve().parent / "data"
 sys.path.insert(0, str(ROOT / "src"))
 
 import etl  # noqa: E402
@@ -26,9 +27,9 @@ def party_votes(tables):
 
 @pytest.fixture(scope="session")
 def official_2026():
-    return json.loads((ROOT / "tests" / "data" / "official_2026_national_summary.json").read_text())
+    return json.loads((DATA / "official_2026_national_summary.json").read_text())
 
 
 @pytest.fixture(scope="session")
 def official_2023():
-    return json.loads((ROOT / "tests" / "data" / "official_2023_national_summary.json").read_text())
+    return json.loads((DATA / "official_2023_national_summary.json").read_text())

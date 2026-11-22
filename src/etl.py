@@ -377,23 +377,29 @@ def checks_turnout_2023(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
 
 
 NATIONAL_2026 = RAW / "ge2026" / "_turnout" / "ge2026_party_votes_national_preliminary.csv"
+NATIONAL_2023 = RAW / "ge2023" / "_turnout" / "ge2023_party_votes_national.csv"
+NATIONAL = {2023: NATIONAL_2023, 2026: NATIONAL_2026}
 
 
-def checks_party_totals_2026(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    """Independent 2026 check: sum of parsed electorate totals per party vs the published national party table.
+def checks_party_totals(tables: dict[str, pd.DataFrame], year: int) -> pd.DataFrame:
+    """Independent check: sum of parsed electorate totals per party vs the published national party table.
 
-    The national table comes from the Commission's results page (preliminary, ordinary votes). Party names are
-    passed through clean_party() so spelling variants line up with staging.
+    The national tables come from the Commission's results pages (2023 official, 2026 preliminary). Party names
+    are passed through clean_party() so spelling variants line up with staging.
     """
-    pub = pd.read_csv(NATIONAL_2026)
+    pub = pd.read_csv(NATIONAL[year])
     pub["party"] = pub["party"].map(clean_party)
     ours = (
-        tables["stg_party_votes"].query("election_year == 2026 and place_kind == 'total'")
+        tables["stg_party_votes"].query("election_year == @year and place_kind == 'total'")
         .groupby("party")["votes"].sum().rename("staging_votes")
     )
     d = pub.set_index("party")[["party_votes"]].join(ours, how="outer")
     d["diff"] = d["staging_votes"] - d["party_votes"]
     return d.reset_index()
+
+
+def checks_party_totals_2026(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    return checks_party_totals(tables, 2026)
 
 
 def write(tables: dict[str, pd.DataFrame]) -> None:

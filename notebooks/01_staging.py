@@ -50,6 +50,17 @@ print(f"{len(chk2)} electorates match; national valid party votes: staging {ours
 assert ours_nat == nat["combined"] == nat["general"] + nat["maori"]
 
 # %% [markdown]
+# ## Second check: published 2023 national party totals
+# Same idea for 2023 (`data/raw/ge2023/_turnout/ge2023_party_votes_national.csv`, the official result).
+
+# %%
+chk4 = etl.checks_party_totals(tables, 2023)
+display(chk4)
+assert not chk4[["party_votes", "staging_votes"]].isna().any().any(), "party present on only one side"
+assert (chk4["diff"] == 0).all(), "2023 party totals differ from the published national table"
+print(f"{len(chk4)} parties match; national total {int(chk4.staging_votes.sum()):,}")
+
+# %% [markdown]
 # ## Second check: published 2026 national party totals
 # Party votes summed over our 71 parsed electorate totals must equal the Commission's published national table
 # (`data/raw/ge2026/_turnout/`, preliminary). This is independent of the per-electorate files.

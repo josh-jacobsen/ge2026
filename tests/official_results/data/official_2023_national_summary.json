@@ -1,9 +1,16 @@
 {
-  "source": "Electoral Commission 2023, party-votes-and-turnout-by-electorate.csv (Combined / General / Māori totals rows)",
+  "source": "Electoral Commission 2023, party-votes-and-turnout-by-electorate.csv (Combined / General / Māori totals rows); national party table (official result) typed from the Commission's 2023 results page",
   "total_party_votes": 2851211,
   "general_party_votes": 2659474,
   "maori_party_votes": 191737,
   "electorates": 72,
   "general_electorates": 65,
-  "maori_electorates": 7
+  "maori_electorates": 7,
+  "electorate_seats": 71,
+  "list_seats": 51,
+  "total_seats": 122,
+  "electorates_with_candidate_votes": 71,
+  "party_only_electorates": [
+    "Port Waikato"
+  ]
 }

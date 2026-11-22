@@ -6,7 +6,7 @@ import pytest
 import etl
 from electorates import MAORI, norm_electorate
 
-OFFICIAL_PARTY_FILE = etl.RAW / "ge2023" / "_turnout" / "ge2023_party_votes_national.csv"
+OFFICIAL_PARTY_FILE = etl.NATIONAL_2023
 
 
 def test_electorate_counts(party_votes, official_2023):
@@ -43,15 +43,48 @@ def test_every_electorate_reconciles_to_its_total_row(tables):
     assert (chk[chk.election_year == 2023]["diff"] == 0).all()
 
 
-def test_national_party_votes_match_published():
-    """Activates once the 2023 national party table is saved as ge2023_party_votes_national.csv
-    (columns: party, party_votes), the 2023 counterpart of the 2026 national file."""
-    if not OFFICIAL_PARTY_FILE.exists():
-        pytest.skip(f"2023 national party table not supplied yet: {OFFICIAL_PARTY_FILE.name}")
-    pub = pd.read_csv(OFFICIAL_PARTY_FILE)
-    pub["party"] = pub["party"].map(etl.clean_party)
-    tables = etl.build()
-    d = tables["stg_party_votes"].query("election_year == 2023 and place_kind == 'total'")
-    staged = d.groupby("party")["votes"].sum()
-    merged = pub.set_index("party")[["party_votes"]].join(staged.rename("staged"), how="outer")
-    assert (merged.party_votes == merged.staged).all(), merged[merged.party_votes != merged.staged]
+PUBLISHED = pd.read_csv(OFFICIAL_PARTY_FILE)
+PUBLISHED["party"] = PUBLISHED["party"].map(etl.clean_party)
+
+
+@pytest.fixture(scope="module")
+def staged_2023(party_votes):
+    d = party_votes[(party_votes.election_year == 2023) & (party_votes.place_kind == "total")]
+    return d.groupby("party")["votes"].sum()
+
+
+@pytest.mark.parametrize("row", list(PUBLISHED.itertuples()), ids=lambda r: r.party)
+def test_party_votes_match_published(row, staged_2023):
+    assert staged_2023.get(row.party) == row.party_votes
+
+
+def test_no_party_missing_from_published_table(staged_2023):
+    assert set(staged_2023.index) == set(PUBLISHED.party)
+
+
+def test_published_table_total(staged_2023, official_2023):
+    assert PUBLISHED.party_votes.sum() == official_2023["total_party_votes"]
+    assert staged_2023.sum() == official_2023["total_party_votes"]
+
+
+def test_published_percentages_consistent_with_votes():
+    # The Commission's percentages are slightly truncated, never more than 0.01 below the exact value.
+    exact = PUBLISHED.party_votes / PUBLISHED.party_votes.sum() * 100
+    assert ((exact - PUBLISHED.pct_votes).between(-0.0001, 0.0101)).all()
+
+
+def test_published_seats_add_up(official_2023):
+    p = PUBLISHED.fillna(0)
+    assert (p.electorate_seats + p.list_seats == p.total_seats).all()
+    assert p.electorate_seats.sum() == official_2023["electorate_seats"]
+    assert p.list_seats.sum() == official_2023["list_seats"]
+    assert p.total_seats.sum() == official_2023["total_seats"]
+
+
+def test_port_waikato_has_party_votes_but_no_candidate_votes(tables, official_2023):
+    """72 electorates voted for parties, but only 71 electorate seats were decided (Port Waikato's candidate vote
+    was held separately), so it has no candidate-vote file. This is expected, not a missing download."""
+    party = set(tables["stg_party_votes"].query("election_year == 2023").electorate)
+    cand = set(tables["stg_candidate_votes"].query("election_year == 2023").electorate)
+    assert len(cand) == official_2023["electorates_with_candidate_votes"] == official_2023["electorate_seats"]
+    assert party - cand == set(official_2023["party_only_electorates"])

@@ -27,13 +27,10 @@ Raw data goes in `data/raw/ge2023/` (CSV) and `data/raw/ge2026/` (XLSX). CLI equ
       unit/                  venue aggregation, distance matching, party-name decisions
       official_results/      rebuilds staging from data/raw and checks it against official figures
         test_2026_national.py    17 party totals, 2,418,565 votes, 71 electorates, seat arithmetic
-        test_2023_national.py    72 electorates, national and general/Māori totals, every electorate vs the turnout table
+        test_2023_national.py    17 party totals, 2,851,211 votes, 72 electorates, seat arithmetic, every electorate vs the turnout table
         test_staged_party_names.py
         data/                    expected official figures (JSON); more in data/raw/*/_turnout/
         conftest.py              builds the staging tables once per run
-
-One 2023 test skips until the 2023 national party table is saved as
-`data/raw/ge2023/_turnout/ge2023_party_votes_national.csv` (`party,party_votes`).
 
 ## Caveats
 - 2026 data is **preliminary, ordinary votes only**. Compare `advance` + `election_day` rows only.

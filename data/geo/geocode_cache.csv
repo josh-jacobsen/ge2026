@@ -1,5 +1,5 @@
 voting_place_raw,lat,lon,matched_query,display_name
-"Albany, Albany Community Hall, (corner Albany Highway & Library Lane)",,,,
+"Albany, Albany Community Hall, (corner Albany Highway & Library Lane)",-36.72692,174.69729,manual,user-supplied; OSM reverse lookup = Albany Hall (amenity/townhall)
 "Albany, Albany Community Hub, 575 Albany Highway",-36.7283514,174.6988526,"575 Albany Highway, Albany, Auckland, New Zealand","Albany House, 575, Albany Highway, Albany Village, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Albany, Albany Community Hub, 575a Albany Highway",-36.7284847,174.6990297,"575a Albany Highway, Albany, Auckland, New Zealand","Albany Community Hub, 575A, Albany Highway, Albany Village, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Albany, Albany Primary School, 6 Bass Road",-36.7360088,174.6899404,"6 Bass Road, Albany, Auckland, New Zealand","Albany Primary School, 6, Bass Road, Albany South, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
@@ -8,7 +8,7 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Albany, Westfield Mall, Centre Court, 219 Don McKinnon Drive",-36.728579,174.7085102,"219 Don McKinnon Drive, Albany, Auckland, New Zealand","2degrees Westfield Albany, 219, Don McKinnon Drive, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Albany, Westfield Mall, near Kmart, 219 Don McKinnon Drive",-36.728579,174.7085102,"219 Don McKinnon Drive, Albany, Auckland, New Zealand","2degrees Westfield Albany, 219, Don McKinnon Drive, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Albany, Westfield Mall, opposite Shavers Shop, 219 Don McKinnon Drive",-36.728579,174.7085102,"219 Don McKinnon Drive, Albany, Auckland, New Zealand","2degrees Westfield Albany, 219, Don McKinnon Drive, Albany, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
-"Auckland City, Atrium on Elliot, Shop 925, next to Rebel Sport, 21-25 Elliot Street",,,,
+"Auckland City, Atrium on Elliot, Shop 925, next to Rebel Sport, 21-25 Elliot Street",-36.84985,174.76358,manual,OSM: Atrium on Elliott (shop/mall)
 "Auckland City, Atrium on Elliott, Shop 3.08, Level 3 near Site Management Office, 21-25 Elliott Street",-36.8501117,174.7636555,"21-25 Elliott Street, Auckland City, Auckland, New Zealand","Japanese Dining You, 21-25, Elliott Street, Midtown, Wynyard Quarter, City Centre, Auckland, Waitematā, Auckland, 1010, New Zealand / Aotearoa"
 "Auckland City, Auckland University Students Association, 4 Alfred Street",-36.8518296,174.7694324,"4 Alfred Street, Auckland City, Auckland, New Zealand","AUSA House, 4, Alfred Street, Learning Quarter, City Centre, Auckland, Waitematā, Auckland, 1010, New Zealand / Aotearoa"
 "Auckland City, Auckland University of Technology, Level 4, Building WA, 55 Wellesley Street",-36.8529871,174.76642,"Auckland University of Technology, Auckland City, Auckland, New Zealand","Auckland University of Technology, Symonds Street, Learning Quarter, Newton, Grafton, Auckland, Waitematā, Auckland, 1010, New Zealand / Aotearoa"
@@ -29,7 +29,7 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Birkdale, Verran Primary School, 136 Verran Road",-36.8018967,174.7135451,"136 Verran Road, Birkdale, Auckland, New Zealand","Verran Primary School, 136, Verran Road, Verrans Corner, Birkdale, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
 "Birkenhead, Birkenhead Primary School, 77 Mokoia Road",-36.8109875,174.7232018,"77 Mokoia Road, Birkenhead, Auckland, New Zealand","Birkenhead School, 77, Mokoia Road, Highbury, Birkenhead, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
 "Birkenhead, Chelsea Primary School, 2 Onetaunga Road",-36.8159736,174.7075636,"2 Onetaunga Road, Auckland, New Zealand","2, Onetaunga Road, Verrans Corner, Chatswood, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
-"Birkenhead, Chelsea Primary School, Corner of Onetaunga & Balmain Road",,,,
+"Birkenhead, Chelsea Primary School, Corner of Onetaunga & Balmain Road",-36.816259,174.70762,manual,"user-supplied; OSM reverse lookup = Chelsea School, 6 Onetaunga Road (amenity/school)"
 "Birkenhead, Highbury Mall, Shop T16, diagonally across from Countdown, 1 Cnr Highbury Bypass & Birkenhead Avenue",-36.8110064,174.7245999,"Highbury Mall, Birkenhead, Auckland, New Zealand","Birkenhead Mall, 35, Mokoia Road, Highbury, Birkenhead, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
 "Birkenhead, Highbury Shopping Centre, 1 Corner Highbury Bypass & Birkenhead Avenue",-36.8110064,174.7245999,"Highbury Shopping Centre, Birkenhead, Auckland, New Zealand","Birkenhead Mall, 35, Mokoia Road, Highbury, Birkenhead, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
 "Birkenhead, Onewa Christian Community Hall, 172 Hinemoa Street",-36.8137131,174.7279498,"172 Hinemoa Street, Birkenhead, Auckland, New Zealand","Saint Andrews Presbyterian Church, 172, Hinemoa Street, Highbury, Birkenhead, Kaipātiki, Auckland, 0626, New Zealand / Aotearoa"
@@ -65,8 +65,8 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Grafton, Auckland City Hospital, Building 32, A+ Trust Room, 2 Park Road",-36.8613918,174.7704476,"2 Park Road, Grafton, Auckland, New Zealand","Columbus Coffee, 2, Park Road, Grafton, Auckland, Waitematā, Auckland, 1010, New Zealand / Aotearoa"
 "Grafton, Auckland City Hospital, Main Building (Building 32) Level 5, 2 Park Road",-36.8613918,174.7704476,"2 Park Road, Grafton, Auckland, New Zealand","Columbus Coffee, 2, Park Road, Grafton, Auckland, Waitematā, Auckland, 1010, New Zealand / Aotearoa"
 "Greenhithe, Greenhithe Community Hall, 7 Greenhithe Road",-36.7759165,174.6707649,"7 Greenhithe Road, Greenhithe, Auckland, New Zealand","Greenhithe Village Hall, 7, Greenhithe Road, Greenhithe, Upper Harbour, Auckland, 0616, New Zealand / Aotearoa"
-"Greenhithe, Greenhithe School Hall, Sunnyview Road entrance",,,,
-"Greenhithe, Greenhithe School Hall, Sunnyview Road entrance, next to 6 Sunnyview Road",,,,
+"Greenhithe, Greenhithe School Hall, Sunnyview Road entrance",-36.774022,174.675395,manual,"user-supplied; OSM reverse lookup = 9 Isobel Road, Greenhithe (address point of Greenhithe School)"
+"Greenhithe, Greenhithe School Hall, Sunnyview Road entrance, next to 6 Sunnyview Road",-36.774022,174.675395,manual,"user-supplied; OSM reverse lookup = 9 Isobel Road, Greenhithe (address point of Greenhithe School)"
 "Greenhithe, Shore Grace Church Hall, 12 Greenhithe Road",-36.7753245,174.6705177,"12 Greenhithe Road, Greenhithe, Auckland, New Zealand","St Michael's Church, 12, Greenhithe Road, Greenhithe, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Greenhithe, Upper Harbour Primary School, 140 Kyle Road",-36.7628776,174.6867689,"140 Kyle Road, Greenhithe, Auckland, New Zealand","140, Kyle Road, Greenhithe, Upper Harbour, Auckland, 0629, New Zealand / Aotearoa"
 "Hauraki, Hauraki Primary School, 82 Jutland Road",-36.8044192,174.7749888,"82 Jutland Road, Hauraki, Auckland, New Zealand","Hauraki Primary School, 82, Jutland Road, Hauraki, Devonport-Takapuna, Auckland, 0622, New Zealand / Aotearoa"
@@ -103,10 +103,10 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Mt Albert, UNITEC, Te Puna, Building 180, 139 Carrington Road",-36.8802769,174.7078566,"UNITEC, Mt Albert, Auckland, New Zealand","Unitec Institute of Technology, Te Ara Tarere, Mount Albert, Albert-Eden, Auckland, 1026, New Zealand / Aotearoa"
 "Murrays Bay, Murrays Bay Intermediate School, 37 Sunrise Avenue",-36.7335714,174.7450023,"37 Sunrise Avenue, Murrays Bay, Auckland, New Zealand","Murrays Bay Intermediate, 37, Sunrise Avenue, Murrays Bay, Hibiscus Coast, Hibiscus and Bays, Auckland, 0630, New Zealand / Aotearoa"
 "Māngere Airport Oaks, Auckland International Airport Terminal - AIRSIDE, Ray Emery Drive",,,,
-"Narrow Neck, Vauxhall Primary School, Morrison Avenue",,,,
+"Narrow Neck, Vauxhall Primary School, Morrison Avenue",-36.81741,174.80301,manual,"OSM: Vauxhall School, 2A Morrison Avenue (amenity/school)"
 "Narrow Neck, Vauxhall School, 2A Morrison Avenue",-36.817407,174.8030057,"2A Morrison Avenue, Narrow Neck, Auckland, New Zealand","Vauxhall School, 2A, Morrison Avenue, Vauxhall, Narrow Neck, Devonport-Takapuna, Auckland, 0624, New Zealand / Aotearoa"
-"New Lynn, LynnMall Shopping Centre, Shop 20B, Memorial Drive, external entry",,,,
-"New Lynn, LynnMall Shopping Centre, inside Memorial Drive entrance, 3058 Great North Road",-36.9088925,174.6845602,"3058 Great North Road, New Lynn, Auckland, New Zealand","Club Physio New Lynn ACC Physio Center, 3058, Great North Road, New Lynn, Whau, Auckland, 0600, New Zealand / Aotearoa"
+"New Lynn, LynnMall Shopping Centre, Shop 20B, Memorial Drive, external entry",-36.9079,174.6855,"LynnMall, New Lynn, Auckland, New Zealand","LynnMall, Hetana Street, New Lynn, Auckland (manual query, checked against OSM)"
+"New Lynn, LynnMall Shopping Centre, inside Memorial Drive entrance, 3058 Great North Road",-36.9079,174.6855,"LynnMall, New Lynn, Auckland, New Zealand","LynnMall, Hetana Street, New Lynn, Auckland (manual query, checked against OSM)"
 "Newmarket, Westfield Newmarket, Level 2, Opposite Sunglass Hut, 277 Broadway",-36.8708593,174.7759095,"Westfield Newmarket, Newmarket, Auckland, New Zealand","Westfield Newmarket, 277, Broadway, Newmarket, Auckland, Waitematā, Auckland, 1149, New Zealand / Aotearoa"
 "Newmarket, Westfield Newmarket, Level 3, by Coffee Club, 309 Broadway",-36.8708593,174.7759095,"Westfield Newmarket, Newmarket, Auckland, New Zealand","Westfield Newmarket, 277, Broadway, Newmarket, Auckland, Waitematā, Auckland, 1149, New Zealand / Aotearoa"
 "Newmarket, Westfield Newmarket, Shop S212, next to ProfessioNAIL, 309 Broadway",-36.8708593,174.7759095,"Westfield Newmarket, Newmarket, Auckland, New Zealand","Westfield Newmarket, 277, Broadway, Newmarket, Auckland, Waitematā, Auckland, 1149, New Zealand / Aotearoa"
@@ -137,14 +137,14 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Rosedale, AUT Millennium Institute, 17 Antares Place",-36.7418493,174.7323395,"17 Antares Place, Rosedale, Auckland, New Zealand","17, Antares Place, Rosedale, Upper Harbour, Auckland, 0732, New Zealand / Aotearoa"
 "Rosedale, Kowhai Kids Centre, 265 Albany Highway",-36.751217,174.6947538,"265 Albany Highway, Auckland, New Zealand","Stihl Shop, 1/265, Albany Highway, Cuthill, Schnapper Rock, Upper Harbour, Auckland, 0632, New Zealand / Aotearoa"
 "Silverdale, PAK'nSAVE Silverdale, Portacom, 20 Hibiscus Coast Highway",-36.6203448,174.6734797,"20 Hibiscus Coast Highway, Silverdale, Auckland, New Zealand","PAK'nSAVE, 20, Hibiscus Coast Highway, Silverdale, Hibiscus Coast, Hibiscus and Bays, Auckland, 9032, New Zealand / Aotearoa"
-"Silverdale, Silverdale Centre Portacom, Car Park adjacent to KFC, Central Boulevard entrance",,,,
+"Silverdale, Silverdale Centre Portacom, Car Park adjacent to KFC, Central Boulevard entrance",-36.61473,174.68038,manual,"OSM: Silverdale Centre (landuse/retail; area centroid, ~block accuracy)"
 "Silverdale, Stella Maris Catholic Primary School Hall, 50 Silverdale Street",-36.6136324,174.6779592,"50 Silverdale Street, Silverdale, Auckland, New Zealand","Stella Maris Catholic Primary School, 50, Silverdale Street, Silverdale, Hibiscus Coast, Hibiscus and Bays, Auckland, 0944, New Zealand / Aotearoa"
 "Silverdale, The Warehouse Silverdale, Technology Section, 61 Silverdale Street",-36.6138701,174.6795573,"61 Silverdale Street, Silverdale, Auckland, New Zealand","KFC, 61, Silverdale Street, Silverdale, Hibiscus Coast, Hibiscus and Bays, Auckland, 0932, New Zealand / Aotearoa"
 "Stanley Bay, Stanley Bay Primary School, 15 Russell Street",-36.8257093,174.784223,"15 Russell Street, Stanley Bay, Auckland, New Zealand","Stanley Bay School, 15, Russell Street, Stanley Point, Devonport-Takapuna, Auckland, 0624, New Zealand / Aotearoa"
 "Sunnynook, Sunnynook Baptist Church, 138 Sunnynook Road",-36.7600861,174.7396829,"138 Sunnynook Road, Sunnynook, Auckland, New Zealand","Sunnynook Baptist Church, 138, Sunnynook Road, Sunnynook, Devonport-Takapuna, Auckland, 0620, New Zealand / Aotearoa"
 "Sunnynook, Sunnynook Primary School, 35 Lyford Crescent",-36.7518402,174.7429453,"35 Lyford Crescent, Sunnynook, Auckland, New Zealand","Sunnynook Primary School, 35, Lyford Crescent, Sunnynook, Devonport-Takapuna, Auckland, 0620, New Zealand / Aotearoa"
-"Takapuna, Shore City Shopping Centre, (corner Lake Road & Anzac Avenue)",,,,
-"Takapuna, Shore City Shopping Centre, Lake Road (corner Lake Road & Anzac Avenue)",,,,
+"Takapuna, Shore City Shopping Centre, (corner Lake Road & Anzac Avenue)",-36.7878615,174.770077,"Shore City, Takapuna, Auckland, New Zealand","Shore City Takapuna, Anzac Street, Takapuna, Auckland (manual query, checked against OSM)"
+"Takapuna, Shore City Shopping Centre, Lake Road (corner Lake Road & Anzac Avenue)",-36.7878615,174.770077,"Shore City, Takapuna, Auckland, New Zealand","Shore City Takapuna, Anzac Street, Takapuna, Auckland (manual query, checked against OSM)"
 "Takapuna, Shore Junction, 19 Northcote Road",-36.7849131,174.7566027,"19 Northcote Road, Takapuna, Auckland, New Zealand","Shore Junction, 19, Northcote Road, Westlake, Takapuna, Devonport-Takapuna, Auckland, 2627, New Zealand / Aotearoa"
 "Taken for Upper Harbour, Voting Team 3, Care homes and Defence Force Base",,,,
 "Taken in East Coast Bays, Care Homes, Team 1",,,,
@@ -172,7 +172,7 @@ voting_place_raw,lat,lon,matched_query,display_name
 "West Harbour, Westgate Baptist Church, 67 Hobsonville Road",-36.8073631,174.6358086,"67 Hobsonville Road, West Harbour, Auckland, New Zealand","Hobsonville Road, West Harbour, Upper Harbour, Auckland, 0618, New Zealand / Aotearoa"
 "Westgate, Te Manawa Library Community Hub, 11 Kōhūhū Lane",-36.8186568,174.6099682,"11 Kōhūhū Lane, Westgate, Auckland, New Zealand","Te Manawa, 11, Kōhūhū Lane, Westwood Gardens, West Hills, Westgate, Henderson-Massey, Auckland, 0814, New Zealand / Aotearoa"
 "Westgate, Votes Allowed for Party Only - Northcote",,,,
-"Westgate, Westgate Shopping Centre (next to EVO Cycles), Fred Taylor Drive",,,,
+"Westgate, Westgate Shopping Centre (next to EVO Cycles), Fred Taylor Drive",-36.82123,174.61164,manual,"OSM: Westgate Shopping Centre (landuse/retail; area centroid, ~block accuracy)"
 "Westgate, Westgate Shopping Centre, opposite Robert Harris, Fred Taylor Drive",-36.8212312,174.6116437,"Westgate Shopping Centre, Westgate, Auckland, New Zealand","Westgate Shopping Centre, West Hills, Westgate, Henderson-Massey, Auckland, New Zealand / Aotearoa"
 "Whangaparāoa, The Coast Whangaparāoa, Downstairs next to Management Office, 719 Whangaparāoa Road",-36.636278,174.748009,"719 Whangaparāoa Road, Whangaparāoa, Auckland, New Zealand","719, Whangaparaoa Road, Big Manly, Stanmore Bay, Whangaparāoa, Hibiscus and Bays, Auckland, 0930, New Zealand / Aotearoa"
 "Whenuapai, Whenuapai School Hall, 14 Airport Road",-36.7926686,174.6193944,"14 Airport Road, Whenuapai, Auckland, New Zealand","Whenuapai School, 14, Airport Road, Whenuapai, Upper Harbour, Auckland, 0618, New Zealand / Aotearoa"

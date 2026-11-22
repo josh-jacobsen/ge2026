@@ -12,7 +12,7 @@ and pick the `.venv` kernel. Regenerate the ipynb after editing the .py: `uv run
 0. `00_rename_raw`: rename 2023 CSVs from their contents; park identical duplicates in `_duplicates/`
 1. `01_staging`: raw CSV/XLSX -> tidy staging tables + reconciliation against official totals
 2. `02_electorates`: reconcile 2023 (72) and 2026 (71) electorates after the 2025 boundary review; writes `data/reference/`
-3. `03_geocode`: Nominatim lookups (cached, resumable); fix misses by hand in the cache CSV
+3. `03_geocode`: Nominatim lookups (cached, resumable); flags pins far from their electorate's other venues (wrong-city hits); fix misses and outliers by hand in the cache CSV
 4. `04_analysis`: shares, swing, voting-place maps (set `FOCUS` to any party)
 
 Raw data goes in `data/raw/ge2023/` (CSV) and `data/raw/ge2026/` (XLSX). CLI equivalents:

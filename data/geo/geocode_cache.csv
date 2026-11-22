@@ -102,7 +102,7 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Milford, North Shore Hospital, Main Entrance Foyer, Shakespeare Road",-36.782251,174.7565627,"North Shore Hospital, Milford, Auckland, New Zealand","North Shore Hospital, 124, Shakespeare Road, Westlake, Takapuna, Devonport-Takapuna, Auckland, 0620, New Zealand / Aotearoa"
 "Mt Albert, UNITEC, Te Puna, Building 180, 139 Carrington Road",-36.8802769,174.7078566,"UNITEC, Mt Albert, Auckland, New Zealand","Unitec Institute of Technology, Te Ara Tarere, Mount Albert, Albert-Eden, Auckland, 1026, New Zealand / Aotearoa"
 "Murrays Bay, Murrays Bay Intermediate School, 37 Sunrise Avenue",-36.7335714,174.7450023,"37 Sunrise Avenue, Murrays Bay, Auckland, New Zealand","Murrays Bay Intermediate, 37, Sunrise Avenue, Murrays Bay, Hibiscus Coast, Hibiscus and Bays, Auckland, 0630, New Zealand / Aotearoa"
-"Māngere Airport Oaks, Auckland International Airport Terminal - AIRSIDE, Ray Emery Drive",,,,
+"Māngere Airport Oaks, Auckland International Airport Terminal - AIRSIDE, Ray Emery Drive",-37.0081,174.792,manual,"user-supplied general Auckland Airport coordinates; OSM reverse lookup = Domestic Bus, Auckland Airport. APPROXIMATE (airport precinct, not the terminal door)"
 "Narrow Neck, Vauxhall Primary School, Morrison Avenue",-36.81741,174.80301,manual,"OSM: Vauxhall School, 2A Morrison Avenue (amenity/school)"
 "Narrow Neck, Vauxhall School, 2A Morrison Avenue",-36.817407,174.8030057,"2A Morrison Avenue, Narrow Neck, Auckland, New Zealand","Vauxhall School, 2A, Morrison Avenue, Vauxhall, Narrow Neck, Devonport-Takapuna, Auckland, 0624, New Zealand / Aotearoa"
 "New Lynn, LynnMall Shopping Centre, Shop 20B, Memorial Drive, external entry",-36.9079,174.6855,"LynnMall, New Lynn, Auckland, New Zealand","LynnMall, Hetana Street, New Lynn, Auckland (manual query, checked against OSM)"
@@ -116,7 +116,7 @@ voting_place_raw,lat,lon,matched_query,display_name
 "Northcote, Awataha Marae, 58 Akoranga Drive",-36.7952464,174.7559831,"58 Akoranga Drive, Northcote, Auckland, New Zealand","58, Akoranga Drive, Northcote, Kaipātiki, Auckland, 2627, New Zealand / Aotearoa"
 "Northcote, Northbridge Retirement Village Hall, 45 Akoranga Drive",-36.7981165,174.7556807,"45 Akoranga Drive, Northcote, Auckland, New Zealand","45, Akoranga Drive, Northcote, Kaipātiki, Auckland, 2627, New Zealand / Aotearoa"
 "Northcote, Northbridge Retirement Village Hall, Gate 2, Centre Way, 45 Akoranga Drive",-36.7981165,174.7556807,"45 Akoranga Drive, Northcote, Auckland, New Zealand","45, Akoranga Drive, Northcote, Kaipātiki, Auckland, 2627, New Zealand / Aotearoa"
-"Northcote, Northcote Citizens Centre Hall, 1 Ernie Mays Street (corner Ernie Mays Street & College Road)",,,,
+"Northcote, Northcote Citizens Centre Hall, 1 Ernie Mays Street (corner Ernie Mays Street & College Road)",-36.8012,174.7474,manual,search-engine summary; verified in OSM: 1 Ernie Mays Street (address point) and Northcote Community Hall (amenity/community_centre) 3 m away
 "Northcote, Northcote Intermediate School, 145 Lake Road",-36.7988534,174.7450133,"145 Lake Road, Northcote, Auckland, New Zealand","145-157, Lake Road, Northcote Central, Northcote, Kaipātiki, Auckland, 0627, New Zealand / Aotearoa"
 "Northcote, Northcote Intermediate, 145 Lake Road",-36.7988534,174.7450133,"145 Lake Road, Northcote, Auckland, New Zealand","145-157, Lake Road, Northcote Central, Northcote, Kaipātiki, Auckland, 0627, New Zealand / Aotearoa"
 "Northcote, Northcote Primary School, 2 Lake Road (corner Onewa Road & Lake Road)",-36.8106684,174.7422135,"Northcote Primary School, Northcote, Auckland, New Zealand","Northcote Primary School, Onewa Road, Highbury, Northcote Point, Kaipātiki, Auckland, 0627, New Zealand / Aotearoa"
@@ -167,8 +167,8 @@ voting_place_raw,lat,lon,matched_query,display_name
 "West Harbour, Votes Allowed for Party Only - Upper Harbour",,,,
 "West Harbour, West Harbour Alliance Church, 145 Moire Road",-36.8194315,174.6296871,"145 Moire Road, West Harbour, Auckland, New Zealand","West Harbour Alliance Church, 145, Moire Road, Kōwhai Ridge, West Harbour, Henderson-Massey, Auckland, 0618, New Zealand / Aotearoa"
 "West Harbour, West Harbour Community Centre (Manutewhau), 74 Oreil Avenue",-36.8236146,174.6226031,"74 Oreil Avenue, West Harbour, Auckland, New Zealand","74, Oreil Avenue, Kōwhai Ridge, West Harbour, Henderson-Massey, Auckland, 0814, New Zealand / Aotearoa"
-"West Harbour, West Harbour Primary School, Sumich Place entrance, next to 8 Sumich Place",,,,
-"West Harbour, West Harbour School, Sumich Place entrance",,,,
+"West Harbour, West Harbour Primary School, Sumich Place entrance, next to 8 Sumich Place",-36.823557,174.62252,manual,"user-supplied (West Harbour School, Institution 1566, 74 Oreil Avenue); verified in OSM: 74 Oreil Avenue address point 10 m away. Sumich Place entrance not in OSM, so ~tens of metres accuracy"
+"West Harbour, West Harbour School, Sumich Place entrance",-36.823557,174.62252,manual,"user-supplied (West Harbour School, Institution 1566, 74 Oreil Avenue); verified in OSM: 74 Oreil Avenue address point 10 m away. Sumich Place entrance not in OSM, so ~tens of metres accuracy"
 "West Harbour, Westgate Baptist Church, 67 Hobsonville Road",-36.8073631,174.6358086,"67 Hobsonville Road, West Harbour, Auckland, New Zealand","Hobsonville Road, West Harbour, Upper Harbour, Auckland, 0618, New Zealand / Aotearoa"
 "Westgate, Te Manawa Library Community Hub, 11 Kōhūhū Lane",-36.8186568,174.6099682,"11 Kōhūhū Lane, Westgate, Auckland, New Zealand","Te Manawa, 11, Kōhūhū Lane, Westwood Gardens, West Hills, Westgate, Henderson-Massey, Auckland, 0814, New Zealand / Aotearoa"
 "Westgate, Votes Allowed for Party Only - Northcote",,,,

@@ -56,3 +56,12 @@ def test_number_of_electorates(party_votes, official_2026):
 def test_every_electorate_reconciles_to_its_total_row(tables):
     chk = etl.checks(tables)
     assert (chk[chk.election_year == 2026]["diff"] == 0).all()
+
+
+def test_electorate_seats_by_party_match_projection(tables, official_2026):
+    # Seat winners by candidate vote (ordinary votes) reproduce the Commission's projected electorate seats.
+    from electorates import winners_2026
+
+    seats = winners_2026(tables["stg_candidate_votes"]).party.value_counts().to_dict()
+    assert seats == official_2026["electorate_seats_by_party"]
+    assert sum(seats.values()) == official_2026["electorate_seats"]

@@ -5,5 +5,13 @@
   "list_seats": 60,
   "total_seats": 131,
   "electorates": 71,
-  "maori_electorates": 7
+  "maori_electorates": 7,
+  "electorate_seats_by_party": {
+    "National Party": 42,
+    "Labour Party": 21,
+    "Green Party": 2,
+    "ACT New Zealand": 1,
+    "Te Pāti Māori": 5
+  },
+  "source_seats": "Electoral Commission, 2026 preliminary 'Projected' table, Electorate Seats column (projected, not final)"
 }

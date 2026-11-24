@@ -157,3 +157,49 @@ def summarise_2023(x: pd.DataFrame, min_share: float = 20.0) -> pd.DataFrame:
         rows.append({"roll": d.roll.iloc[0], "electorate_2023": e23, "relationship": rel, "same_name_share": round(same_share, 1),
                      "destinations": "; ".join(f"{r.electorate_2026} {r.share_of_2023:.0f}%" for r in big.itertuples())})
     return pd.DataFrame(rows).sort_values(["roll", "electorate_2023"]).reset_index(drop=True)
+
+
+def winners_2026(candidate_votes: pd.DataFrame, kinds=("advance", "election_day")) -> pd.DataFrame:
+    """Electorate seat winner by candidate vote (2026, ordinary votes), with party and margin.
+
+    The 2026 files name candidates without a party, so the party comes from
+    data/reference/ge2026_winner_parties.csv (winners only; source: the Commission's candidate list).
+    """
+    d = candidate_votes[(candidate_votes.election_year == 2026) & candidate_votes.place_kind.isin(kinds)]
+    t = d.groupby(["electorate", "candidate"], as_index=False)["votes"].sum().sort_values(["electorate", "votes"], ascending=[True, False])
+    t["rank"] = t.groupby("electorate").cumcount()
+    win = t[t["rank"] == 0].drop(columns="rank")
+    win["margin"] = win.votes.values - t[t["rank"] == 1].votes.values
+    parties = pd.read_csv(REFERENCE / "ge2026_winner_parties.csv")
+    out = win.merge(parties, on="candidate", how="left")
+    if out.party.isna().any():
+        raise ValueError(f"no party for winners: {out[out.party.isna()].candidate.tolist()}")
+    return out.reset_index(drop=True)
+
+
+# 2025 boundary review name changes (Electoral Commission): 2026 electorate -> its main 2023 predecessor
+# (the first-named in the Commission's list). Seats drawn from several 2023 seats are compared against the first one;
+# `seat_overlap` says how much of the 2026 seat that really is.
+PREDECESSOR = {
+    "Waitākere": "New Lynn", "Henderson": "Te Atatū", "Glendene": "Kelston", "Ōtāhuhu": "Panmure-Ōtāhuhu",
+    "Mt Maunganui": "Bay of Plenty", "East Cape": "East Coast", "Kapiti": "Ōtaki", "Kenepuru": "Mana",
+    "Wellington North": "Wellington Central", "Wellington Bays": "Rongotai",
+}
+
+
+def align_2023(df: pd.DataFrame) -> pd.DataFrame:
+    """Relabel 2023 rows of renamed electorates with their 2026 name, so electorates can be joined by name."""
+    back = {old: new for new, old in PREDECESSOR.items()}
+    out = df.copy()
+    m = out.election_year == 2023
+    out.loc[m, "electorate"] = out.loc[m, "electorate"].replace(back)
+    return out
+
+
+def seat_overlap() -> pd.Series:
+    """Per 2026 electorate: % of its election-day votes from the 2023 seat it is compared with (100 = same area)."""
+    s = pd.read_csv(REFERENCE / "electorate_relationships_2026.csv").set_index("electorate_2026").same_name_share.copy()
+    pairs = pd.read_csv(REFERENCE / "electorate_crosswalk_pairs.csv")
+    for new, old in PREDECESSOR.items():
+        s[new] = pairs[(pairs.electorate_2026 == new) & (pairs.electorate_2023 == old)].share_of_2026.iloc[0]
+    return s.round(1)

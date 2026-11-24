@@ -4,7 +4,7 @@
 # special votes. Change `FOCUS` to look at any party.
 #
 # Two ways to compare, because the 2025 boundary review changed the electorates:
-# * **Electorate level**: only for electorates flagged `comparable` in notebook 02 (same name, ≥ 80 % overlap).
+# * **Electorate level**: matched by name, with the Commission's 2025 rename list for the 10 renamed seats (boundaries of many moved).
 # * **Voting-place level**: venues are summed across every electorate that lists them, then 2026 venues are paired
 #   with 2023 venues **by geocoded distance** (≤ `MATCH_M`, mutual nearest neighbour). This works for any seat.
 #
@@ -34,7 +34,7 @@ geo = pd.read_csv(ROOT / "data/geo/geocode_cache.csv")
 rel = pd.read_csv(ROOT / "data/reference/electorate_relationships_2026.csv")
 
 # %% [markdown]
-# ## 1. Party vote share by electorate (comparable electorates only)
+# ## 1. Party vote share by electorate (matched by name; see the Commission's rename list)
 
 # %%
 def share(df, by):
@@ -42,11 +42,14 @@ def share(df, by):
     t["share"] = t.votes / t.groupby(by)["votes"].transform("sum") * 100
     return t
 
-comparable = set(rel[rel.comparable].electorate_2026)
-by_elec = share(pv[pv.electorate.isin(comparable)], ["election_year", "electorate"])
+import electorates
+pv_named = electorates.align_2023(pv)   # 2023 rows of the 10 renamed seats get their 2026 name (Commission's list)
+names = pv_named.groupby("election_year").electorate.agg(set)
+comparable = names[2023] & names[2026]
+by_elec = share(pv_named[pv_named.electorate.isin(comparable)], ["election_year", "electorate"])
 wide = by_elec.pivot_table(index=["electorate", "party"], columns="election_year", values="share")
 wide["swing_pts"] = wide[2026] - wide[2023]
-print(f"{len(comparable)} comparable electorates (of {len(rel)})")
+print(f"{len(comparable)} of {len(rel)} electorates compared across years (by name, renames via the Commission list)")
 focus_swing = wide.xs(FOCUS, level="party").dropna().sort_values("swing_pts")
 display(focus_swing.round(2).head(5)); display(focus_swing.round(2).tail(5))
 

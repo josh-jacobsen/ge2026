@@ -125,7 +125,6 @@ function rankRows(rs){
   const key=S.rank==='pct'?'pct':'v';
   return {ok:ok.slice().sort((a,b)=>b[key]-a[key]||b.n-a.n),hidden:rs.length-ok.length};
 }
-function name(r){return `<span class="nm">${esc(r.s)}<small>${esc(r.p)}</small></span>`}
 function tag(r){return r.hp<50?`<span class="tag" title="Under half of this venue's votes for the party came from voters of ${esc(r.e)}">mostly non-local</span>`:''}
 function val(r){return `<span class="num">${S.rank==='pct'?f1(r.pct):f0(r.v)}<small>${S.rank==='pct'?f0(r.v)+' of '+f0(r.n):f1(r.pct)+' of '+f0(r.n)}<br>${Math.round(r.hp)}% local</small></span>`}
 function render(){
@@ -146,7 +145,7 @@ function render(){
     out.innerHTML='<div class="grid">'+es.map(e=>{
       const {ok}=rankRows(by[e]), top=ok.slice(0,N);
       return `<div class="card"><h3>${esc(e)}<small>${ok.length} ranked${N<ok.length?`, top ${N} shown`:''}</small></h3>`+
-       (top.map((r,i)=>`<div class="pl"><span class="rk">${i+1}</span><span class="nm">${esc(r.s)}${tag(r)}<small>${esc(r.p)}</small></span>${val(r)}</div>`).join('')||'<div class="note">No venue qualifies.</div>')+'</div>';
+       (top.map((r,i)=>`<div class="pl"><span class="rk">${i+1}</span><span class="nm"><b>${esc(r.p||r.s)}</b>${tag(r)}<small>${esc(r.p?r.s:"")}</small></span>${val(r)}</div>`).join('')||'<div class="note">No venue qualifies.</div>')+'</div>';
     }).join('')+'</div>';
     $('foot').textContent=note()+'Use "Show" for more venues, or pick one electorate (or the national list) for a full ranked table.';
     return;
@@ -155,7 +154,7 @@ function render(){
   const {ok,hidden}=rankRows(nat?rs:(by[S.elec]||[])), max=Math.max(...ok.map(r=>r[key]),1);
   const seen={}, rk=ok.map(r=>(seen[r.e]=(seen[r.e]||0)+1));
   out.innerHTML=`<table><thead><tr><th>#</th>${nat?'<th>Electorate</th><th class="r">In elec.</th>':''}<th>Venue</th><th class="r">${pctMode?'Share':'Votes'}</th><th class="r">${pctMode?'Votes':'Share'}</th><th class="r">Local %</th><th class="r">All ballots</th></tr></thead><tbody>`+
-   ok.map((r,i)=>`<tr class="${rk[i]<=3?'top':''}"><td>${i+1}</td>${nat?`<td>${esc(r.e)}</td><td class="r">${rk[i]}</td>`:''}<td>${esc(r.s)}${tag(r)}<small style="display:block;color:var(--mute)">${esc(r.p)}</small></td>`+
+   ok.map((r,i)=>`<tr class="${rk[i]<=3?'top':''}"><td>${i+1}</td>${nat?`<td>${esc(r.e)}</td><td class="r">${rk[i]}</td>`:''}<td><b>${esc(r.p||r.s)}</b>${tag(r)}<small style="display:block;color:var(--mute)">${esc(r.p?r.s:"")}</small></td>`+
      `<td class="r">${pctMode?f1(r.pct):f0(r.v)}<div class="meter"><i style="width:${100*r[key]/max}%"></i></div></td>`+
      `<td class="r">${pctMode?f0(r.v):f1(r.pct)}</td><td class="r">${Math.round(r.hp)}%</td><td class="r">${f0(r.n)}</td></tr>`).join('')+'</tbody></table>';
   $('foot').textContent=note()+`${ok.length} venues ranked`+(hidden?`; ${hidden} venues with fewer than ${S.minv} ballots left out of the share ranking`:'')+(nat?'. "#" is the national rank; "In elec." is the rank within the home electorate (top 3 highlighted).':'. Top 3 highlighted.');

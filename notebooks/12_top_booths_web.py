@@ -19,8 +19,10 @@
 # placed in its **home electorate** (the general-roll electorate with most votes there). Same data as notebook 11, built by `src/booths.py`.
 #
 # On the page you choose the party (Green or TOP), the year (2023 or 2026), and what to rank by (number of votes or share of the venue's ballots).
-# * **Focus seats** or **All electorates**: a card per home electorate with its top 3 venues.
+# * **Focus seats** or **All electorates**: a card per home electorate, showing the top 3, 5, 10 or all of its venues (the *Show* menu).
+# * **All venues, one national list**: every venue in the country as one ranked table, with its rank within its own electorate too.
 # * **One electorate**: every venue in it, ranked, with the top 3 highlighted.
+# * A **filter box** narrows any view to venues whose name or address contains the text.
 # * **Min ballots at venue** (default 100) keeps tiny venues out of the share ranking.
 # * **Local %** on every row: the share of the party's votes at the venue cast by voters of the home electorate.
 #
@@ -77,7 +79,7 @@ h1{font-size:1.3rem;margin:.2rem 0}.sub{color:var(--mute);margin:0 0 12px;font-s
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{border:0;background:var(--card);color:var(--fg);padding:6px 12px;font:inherit;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--accent,var(--g));color:#fff}
-select,input[type=number]{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
+select,input[type=number],input[type=search]{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
 input[type=number]{width:5.5em}label{color:var(--mute);font-size:.9rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
@@ -102,13 +104,15 @@ td.r,th.r{text-align:right}tr.top td{background:var(--hi)}
  <div class="seg" id="year"><button data-v="2023">2023</button><button data-v="2026">2026</button></div>
  <div class="seg" id="rank"><button data-v="v">Most votes</button><button data-v="pct">Highest share</button></div>
  <select id="elec" aria-label="Electorate"></select>
+ <label>Show <select id="show" aria-label="Venues per electorate"><option value="3">top 3</option><option value="5">top 5</option><option value="10">top 10</option><option value="all">all venues</option></select></label>
+ <input type="search" id="q" placeholder="Filter venues" aria-label="Filter venues">
  <label>Min ballots at venue <input type="number" id="minv" min="0" step="10"></label>
 </div>
 <div id="out"></div><p class="note" id="foot"></p>
 </main>
 <script>
 const D=__DATA__;
-const S={party:'g',year:2023,rank:'v',elec:'__focus',minv:100};
+const S={party:'g',year:2023,rank:'v',elec:'__focus',minv:100,show:'3',q:''};
 const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const NAMES={g:'Green Party',t:'Opportunity Party (TOP)'};
 const f0=n=>n.toLocaleString('en-NZ'), f1=n=>n.toFixed(1)+'%';
@@ -119,7 +123,7 @@ function rowsFor(){
 function rankRows(rs){
   const ok=rs.filter(r=>S.rank==='pct'?r.n>=S.minv:true&&r.n>=0);
   const key=S.rank==='pct'?'pct':'v';
-  return {ok:ok.filter(r=>r[key]>0).sort((a,b)=>b[key]-a[key]||b.n-a.n),hidden:rs.length-ok.length};
+  return {ok:ok.slice().sort((a,b)=>b[key]-a[key]||b.n-a.n),hidden:rs.length-ok.length};
 }
 function name(r){return `<span class="nm">${esc(r.s)}<small>${esc(r.p)}</small></span>`}
 function tag(r){return r.hp<50?`<span class="tag" title="Under half of this venue's votes for the party came from voters of ${esc(r.e)}">mostly non-local</span>`:''}
@@ -129,36 +133,44 @@ function render(){
   $('ptitle').textContent=NAMES[S.party]+', '+S.year;
   $('sub').textContent=D.subtitle;
   for(const id of ['party','year','rank'])for(const b of $(id).children)b.setAttribute('aria-pressed',String(b.dataset.v===String(S[id==='rank'?'rank':id])));
-  const rs=rowsFor(), by={};
+  const q=S.q.trim().toLowerCase();
+  const all=rowsFor();
+  const rs=q?all.filter(r=>(r.s+' '+r.p).toLowerCase().includes(q)):all, by={};
   rs.forEach(r=>(by[r.e]=by[r.e]||[]).push(r));
-  const out=$('out');
-  if(S.elec.startsWith('__')){
+  const out=$('out'), pctMode=S.rank==='pct', key=pctMode?'pct':'v';
+  const note=()=>(pctMode?`Ranked by share among venues with at least ${S.minv} ballots. `:'')+(q?`Filtered to "${esc(S.q.trim())}". `:'');
+  if(S.elec==='__focus'||S.elec==='__all'){
     let es=Object.keys(by).sort((a,b)=>a.localeCompare(b));
     if(S.elec==='__focus')es=D.focus.filter(e=>by[e]);
+    const N=S.show==='all'?Infinity:+S.show;
     out.innerHTML='<div class="grid">'+es.map(e=>{
-      const {ok}=rankRows(by[e]), top=ok.slice(0,3);
-      return `<div class="card"><h3>${esc(e)}<small>${by[e].length} venues</small></h3>`+
+      const {ok}=rankRows(by[e]), top=ok.slice(0,N);
+      return `<div class="card"><h3>${esc(e)}<small>${ok.length} ranked${N<ok.length?`, top ${N} shown`:''}</small></h3>`+
        (top.map((r,i)=>`<div class="pl"><span class="rk">${i+1}</span><span class="nm">${esc(r.s)}${tag(r)}<small>${esc(r.p)}</small></span>${val(r)}</div>`).join('')||'<div class="note">No venue qualifies.</div>')+'</div>';
     }).join('')+'</div>';
-    $('foot').textContent=(S.rank==='pct'?`Ranked by share among places with at least ${S.minv} ballots. `:'')+'Click an electorate in the menu to see every place in it.';
-  }else{
-    const {ok,hidden}=rankRows(by[S.elec]||[]), max=Math.max(...ok.map(r=>S.rank==='pct'?r.pct:r.v),1);
-    out.innerHTML=`<table><thead><tr><th>#</th><th>Venue</th><th class="r">${S.rank==='pct'?'Share':'Votes'}</th><th class="r">${S.rank==='pct'?'Votes':'Share'}</th><th class="r">Local %</th><th class="r">All ballots</th></tr></thead><tbody>`+
-     ok.map((r,i)=>`<tr class="${i<3?'top':''}"><td>${i+1}</td><td>${esc(r.s)}${tag(r)}<small style="display:block;color:var(--mute)">${esc(r.p)}</small></td>`+
-       `<td class="r">${S.rank==='pct'?f1(r.pct):f0(r.v)}<div class="meter"><i style="width:${100*(S.rank==='pct'?r.pct:r.v)/max}%"></i></div></td>`+
-       `<td class="r">${S.rank==='pct'?f0(r.v):f1(r.pct)}</td><td class="r">${Math.round(r.hp)}%</td><td class="r">${f0(r.n)}</td></tr>`).join('')+'</tbody></table>';
-    $('foot').textContent=`${ok.length} venues ranked`+(hidden?`; ${hidden} venues with fewer than ${S.minv} ballots left out of the share ranking`:'')+'. Top 3 highlighted.';
+    $('foot').textContent=note()+'Use "Show" for more venues, or pick one electorate (or the national list) for a full ranked table.';
+    return;
   }
+  const nat=S.elec==='__nat';
+  const {ok,hidden}=rankRows(nat?rs:(by[S.elec]||[])), max=Math.max(...ok.map(r=>r[key]),1);
+  const seen={}, rk=ok.map(r=>(seen[r.e]=(seen[r.e]||0)+1));
+  out.innerHTML=`<table><thead><tr><th>#</th>${nat?'<th>Electorate</th><th class="r">In elec.</th>':''}<th>Venue</th><th class="r">${pctMode?'Share':'Votes'}</th><th class="r">${pctMode?'Votes':'Share'}</th><th class="r">Local %</th><th class="r">All ballots</th></tr></thead><tbody>`+
+   ok.map((r,i)=>`<tr class="${rk[i]<=3?'top':''}"><td>${i+1}</td>${nat?`<td>${esc(r.e)}</td><td class="r">${rk[i]}</td>`:''}<td>${esc(r.s)}${tag(r)}<small style="display:block;color:var(--mute)">${esc(r.p)}</small></td>`+
+     `<td class="r">${pctMode?f1(r.pct):f0(r.v)}<div class="meter"><i style="width:${100*r[key]/max}%"></i></div></td>`+
+     `<td class="r">${pctMode?f0(r.v):f1(r.pct)}</td><td class="r">${Math.round(r.hp)}%</td><td class="r">${f0(r.n)}</td></tr>`).join('')+'</tbody></table>';
+  $('foot').textContent=note()+`${ok.length} venues ranked`+(hidden?`; ${hidden} venues with fewer than ${S.minv} ballots left out of the share ranking`:'')+(nat?'. "#" is the national rank; "In elec." is the rank within the home electorate (top 3 highlighted).':'. Top 3 highlighted.');
 }
 function fillElec(){
   const es=[...new Set(D.rows.filter(r=>r[0]===S.year).map(r=>r[1]))].sort((a,b)=>a.localeCompare(b));
-  $('elec').innerHTML='<option value="__focus">Focus seats (4)</option><option value="__all">All electorates</option>'+
+  $('elec').innerHTML='<option value="__focus">Focus seats (4)</option><option value="__all">All electorates</option><option value="__nat">All venues, one national list</option>'+
     '<optgroup label="One electorate: every venue">'+es.map(e=>`<option>${esc(e)}</option>`).join('')+'</optgroup>';
   if(!(S.elec.startsWith('__')||es.includes(S.elec)))S.elec='__focus';
   $('elec').value=S.elec;
 }
 for(const id of ['party','year','rank'])$(id).addEventListener('click',e=>{const v=e.target.dataset.v;if(!v)return;S[id==='rank'?'rank':id]=id==='year'?+v:v;if(id==='year')fillElec();render()});
 $('elec').addEventListener('change',e=>{S.elec=e.target.value;render()});
+$('show').addEventListener('change',e=>{S.show=e.target.value;render()});
+$('q').addEventListener('input',e=>{S.q=e.target.value;render()});
 $('minv').addEventListener('input',e=>{S.minv=Math.max(0,+e.target.value||0);render()});
 $('minv').value=S.minv;fillElec();render();
 </script></body></html>"""

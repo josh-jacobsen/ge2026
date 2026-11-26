@@ -83,10 +83,13 @@ h1{font-size:20px;margin:0 0 2px}
 .arrow{font-size:11px;color:var(--muted);min-width:10px}
 input[type=search]{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 10px;border-radius:8px;font:inherit;min-width:150px}
 label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);cursor:pointer}
-.axis{display:grid;grid-template-columns:150px 1fr;color:var(--muted);font-size:11px;margin-top:6px}
+.axis{display:grid;grid-template-columns:48px 150px 1fr;color:var(--muted);font-size:11px;margin-top:6px;align-items:end}
+.rankhead{text-align:right;padding-right:8px;line-height:1.15}
 .ticks{position:relative;height:16px}
 .ticks span{position:absolute;transform:translateX(-50%)}
-.row{display:grid;grid-template-columns:150px 1fr;align-items:center;border-top:1px solid var(--line);padding:3px 0}
+.row{display:grid;grid-template-columns:48px 150px 1fr;align-items:center;border-top:1px solid var(--line);padding:3px 0}
+.rank{text-align:right;padding-right:8px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted)}
+.row.focus .rank{color:var(--fg)}
 .row.focus{background:var(--focus)}
 .name{font-size:12px;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row.focus .name{font-weight:700}
@@ -97,7 +100,7 @@ label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);curs
 .bar.none em{font-style:italic}
 .nat{position:absolute;top:0;bottom:0;border-left:1px dashed}
 .legend-note{color:var(--muted);font-size:12px;margin-top:14px}
-@media (max-width:560px){.axis,.row{grid-template-columns:96px 1fr}.name{font-size:11px}}
+@media (max-width:560px){.axis,.row{grid-template-columns:44px 90px 1fr}.name{font-size:11px}}
 </style>
 </head>
 <body>
@@ -110,7 +113,7 @@ label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);curs
   <label class="chk"><input type="checkbox" id="onlyFocus"> Focus seats only</label>
   <label class="chk"><input type="checkbox" id="focusFirst"> Focus seats first</label>
 </div>
-<div class="axis"><div></div><div class="ticks" id="ticks"></div></div>
+<div class="axis"><div class="rankhead" id="rankhead">Rank</div><div></div><div class="ticks" id="ticks"></div></div>
 <div id="rows"></div>
 <p class="legend-note">Bars are the share of valid votes (%). Dashed lines are the national party share (2023 light, 2026 dark).
 A missing bar means the Greens stood no candidate that year. Hover a row for exact figures.</p>
@@ -139,6 +142,23 @@ function cmp(a, b) {
   if (vb == null) return -1;
   const d = typeof va === "string" ? va.localeCompare(vb) : va - vb;
   return (state.dir === "asc" ? d : -d) || a.name.localeCompare(b.name);
+}
+
+// Rank among ALL electorates for the current sort (a search or filter never renumbers them). Ties share a rank;
+// electorates with no value (no Green candidate) are unranked.
+function assignRanks() {
+  const all = [...DATA].sort(cmp);
+  let prev, prevRank = 0;
+  all.forEach((r, i) => {
+    const v = r[state.key];
+    if (v == null) { r.rank = null; return; }
+    r.rank = (typeof v !== "string" && v === prev) ? prevRank : i + 1;
+    prev = v; prevRank = r.rank;
+  });
+}
+function rankLabel() {
+  if (state.key === "name") return "A–Z";
+  return `Rank<br>${state.dir === "desc" ? "1 = high" : "1 = low"}`;
 }
 
 function buildSorts() {
@@ -172,6 +192,8 @@ function buildTicks() {
 
 function render() {
   buildSorts();
+  assignRanks();
+  $("rankhead").innerHTML = rankLabel();
   const q = $("q").value.trim().toLowerCase();
   let rows = DATA.filter(r => r.name.toLowerCase().includes(q) && (!$("onlyFocus").checked || r.focus));
   rows.sort(cmp);
@@ -182,6 +204,9 @@ function render() {
     const row = document.createElement("div"); row.className = "row" + (r.focus ? " focus" : "");
     row.title = `${r.name}\nParty vote 2023: ${fmt(r.p23)}   2026: ${fmt(r.p26)}\nCandidate vote 2023: ${fmt(r.c23)}   2026: ${fmt(r.c26)}` +
       (r.gap26 == null ? "" : `\nGap 2026 (candidate − party): ${r.gap26.toFixed(1)} pts`);
+    const rk = document.createElement("div"); rk.className = "rank"; rk.textContent = r.rank == null ? "–" : r.rank;
+    rk.title = r.rank == null ? "no value for this series" : `${r.rank} of ${DATA.filter(d => d[state.key] != null).length}`;
+    row.append(rk);
     const n = document.createElement("div"); n.className = "name"; n.textContent = r.name + (r.maori ? " (M)" : ""); row.append(n);
     const bars = document.createElement("div"); bars.className = "bars";
     bars.style.backgroundImage = grid; bars.style.backgroundSize = (10 / MAX * 100) + "% 100%";

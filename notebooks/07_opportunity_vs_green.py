@@ -22,7 +22,7 @@ ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
-import electorates, vote_scope
+import electorates, plotstyle, vote_scope
 
 GREEN, TOP = "Green Party", "The Opportunities Party (TOP)"
 FOCUS_SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
@@ -144,9 +144,10 @@ display(slopes.round(2))
 
 # %%
 fig, ax = plt.subplots(figsize=(8, 6))
-for seat, color in zip(FOCUS_SEATS, ["#1b7f4b", "#d9731a", "#4c72b0", "#8172b2"]):
+# one colour (the Green swing is what is plotted); electorates are told apart by marker shape
+for seat, marker in plotstyle.seat_markers(FOCUS_SEATS).items():
     d = ven[ven.electorate == seat]
-    ax.scatter(d.top, d.green, s=np.sqrt(d.total_26) * 1.2, alpha=0.6, color=color, label=f"{seat} ({len(d)})")
+    ax.scatter(d.top, d.green, s=np.sqrt(d.total_26) * 1.2, alpha=0.6, color="#1b7f4b", marker=marker, label=f"{seat} ({len(d)})")
 b, a = ols(ven.top, ven.green, ven.total_26)
 xs = np.linspace(ven.top.min(), ven.top.max(), 10)
 ax.plot(xs, a + b * xs, color="black", lw=1.2, label=f"fit, all places (slope {b:+.2f})")

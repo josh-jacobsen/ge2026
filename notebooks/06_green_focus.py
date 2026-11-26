@@ -36,7 +36,7 @@ ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
-import electorates, vote_scope
+import electorates, plotstyle, vote_scope
 
 PARTY = "Green Party"
 VOTE_SCOPE = "ordinary"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
@@ -199,9 +199,13 @@ plt.tight_layout(); plt.show()
 # %%
 fig, axes = plt.subplots(1, 2, figsize=(13, 4.5), sharey=False)
 for ax, kind, nat, label in ((axes[0], "party", nat_party, "Party vote"), (axes[1], "cand", nat_cand, "Candidate vote")):
-    for s in FOCUS_SEATS:
+    for s, marker in plotstyle.seat_markers(FOCUS_SEATS).items():   # green lines; electorates differ by marker shape
         v = [t.loc[s, f"{kind}_2023"], t.loc[s, f"{kind}_2026"]]
-        ax.plot([2023, 2026], v, marker="o", label=s) if not np.isnan(v).any() else ax.scatter([2026], [v[1]], marker="D", label=f"{s} (no 2023 Green candidate)")
+        if not np.isnan(v).any():
+            ax.plot([2023, 2026], v, marker=marker, ms=7, color="#1b7f4b", label=s)
+        else:   # no Green candidate in 2023: a single hollow marker for 2026
+            ax.scatter([2026], [v[1]], marker=marker, s=50, facecolor="white", edgecolor="#1b7f4b", linewidth=1.5, zorder=3,
+                       label=f"{s} (no 2023 Green candidate)")
     ax.plot([2023, 2026], [nat[2023], nat[2026]], color="black", ls="--", lw=2, label="national")
     ax.set_xticks([2023, 2026]); ax.set_ylabel("Green share (%)"); ax.set_title(label); ax.legend(fontsize=7)
 plt.tight_layout(); plt.show()

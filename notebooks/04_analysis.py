@@ -251,6 +251,11 @@ for year, d, outline in ((2026, only_2026, "#1f77b4"), (2023, only_2023, "#ff7f0
                                             venue_table(r.venue_id, year=year))).add_to(L)
     L.add_to(m)
 
-cm.add_to(m); cs.add_to(m); folium.LayerControl(collapsed=False).add_to(m)
+# one small legend at the bottom-left instead of two big colour bars at the top (click its title to minimise it)
+maps.legend(m, ramps=[(f"{FOCUS} swing 2023→2026 (pts), matched venues", ["#b2182b", "#f7f7f7", "#1b7837"], f"{-lim:+.0f}", f"{lim:+.0f}"),
+                      (f"{FOCUS} share (%), one-year venues", ["#f7fcf5", "#74c476", "#00441b"], "0", f"{vmax:.0f}")],
+            keys=[("#1f77b4", "2026 only", True), ("#ff7f0e", "2023 only", True), ("#bdbdbd", "matched, too few votes", False)],
+            title="Legend")
+folium.LayerControl(collapsed=False).add_to(m)
 m.save(ROOT / "data/geo/swing_map.html")  # open in a browser for a full-screen version
 m

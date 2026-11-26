@@ -29,15 +29,17 @@ ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
-import places
+import vote_scope
 
 FOCUS = "Green Party"
+VOTE_SCOPE = "ordinary"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
+COUNT_STAGE = "preliminary"  # 2026 count: "preliminary" or "final" (data/raw/ge2026_final)
 TOP_N = 15             # rows in the ranking charts
 HEATMAP_PARTIES = 8    # biggest parties nationally in 2026
 pd.set_option("display.width", 200, "display.max_columns", 30, "display.max_rows", 100)
 
-pv = pd.read_parquet(ROOT / "data/staging/stg_party_votes.parquet")
-pv = pv[pv.place_kind.isin(places.ORDINARY)]
+pv = vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE)
+print(vote_scope.describe(VOTE_SCOPE, COUNT_STAGE))
 rel = pd.read_csv(ROOT / "data/reference/electorate_relationships_2026.csv")
 # Electorates are compared by name, using the Commission's list of 2025 name changes for the 10 renamed seats
 # (`electorates.PREDECESSOR`, e.g. East Coast -> East Cape). The boundary review moved some of them, so `overlap`
@@ -115,8 +117,8 @@ display(lead.sort_values("margin_2026").head(10).round(1))   # closest contests 
 # %%
 import electorates
 
-cv = pd.read_parquet(ROOT / "data/staging/stg_candidate_votes.parquet")
-win = electorates.winners_2026(cv).set_index("electorate")
+cv = vote_scope.load("stg_candidate_votes", VOTE_SCOPE, COUNT_STAGE)
+win = electorates.winners_2026(cv, kinds=None, stage=COUNT_STAGE).set_index("electorate")
 win["party_vote_leader"] = lead.lead_2026
 win["differs"] = win.party != win.party_vote_leader
 display(win.party.value_counts().to_frame("seats won"))

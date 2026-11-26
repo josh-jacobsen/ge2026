@@ -14,7 +14,7 @@ PUBLISHED["party"] = PUBLISHED["party"].map(etl.clean_party)
 
 @pytest.fixture(scope="module")
 def staged_2026(party_votes):
-    d = party_votes[(party_votes.election_year == 2026) & (party_votes.place_kind == "total")]
+    d = party_votes[(party_votes.election_year == 2026) & (party_votes.count_stage == "preliminary") & (party_votes.place_kind == "total")]
     return d.groupby("party")["votes"].sum()
 
 

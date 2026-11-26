@@ -24,6 +24,15 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 STAGING = ROOT / "data" / "staging"
 
+# 2023 results are final. 2026 results come in stages, each in its own folder; the same electorate can be in both, and
+# every staging row carries `count_stage` so preliminary and final are never mixed up or double counted.
+STAGE_DIRS = {"preliminary": "ge2026", "final": "ge2026_final"}
+
+
+def raw_dir(year: int, stage: str = "preliminary") -> Path:
+    return RAW / (STAGE_DIRS[stage] if year == 2026 else f"ge{year}")
+
+
 # Non-party columns at the right-hand edge of every sheet.
 TOTAL_COLS = {"Total Valid Party Votes", "Informal Party Votes", "Total Valid Candidate Votes", "Informal Candidate Votes"}
 
@@ -212,14 +221,14 @@ def _hidden(path: Path, base: Path) -> bool:
     return any(part.startswith("_") for part in path.relative_to(base).parts)
 
 
-def raw_files(year: int) -> list[tuple[Path, Path]]:
+def raw_files(year: int, stage: str = "preliminary") -> list[tuple[Path, Path]]:
     """(current path, canonical path) for every result file of the year, read from contents.
 
     2023: CSV, one per electorate and kind  -> ge2023_<electorate>_<party|candidate>.csv
     2026: XLSX, both sheets in one file    -> ge2026_<electorate>.xlsx
     Anything under an underscore-prefixed folder (_duplicates) or not recognisable is ignored.
     """
-    base = RAW / f"ge{year}"
+    base = raw_dir(year, stage)
     out = []
     if year == 2023:
         for p in sorted(base.rglob("*.csv")):
@@ -232,17 +241,17 @@ def raw_files(year: int) -> list[tuple[Path, Path]]:
     return out
 
 
-def rename_raw(year: int, dry_run: bool = False) -> list[tuple[Path, Path]]:
+def rename_raw(year: int, dry_run: bool = False, stage: str = "preliminary") -> list[tuple[Path, Path]]:
     """Rename result files to canonical names from their contents and park identical duplicates.
 
     Safe to re-run. Two files with the same canonical name must be byte-identical (the extra goes to
     _duplicates/); otherwise it stops. Nothing is overwritten or deleted.
     """
-    base = RAW / f"ge{year}"
+    base = raw_dir(year, stage)
     plan: dict[Path, Path] = {}
     extras: list[Path] = []
     # files that already carry their canonical name win, so re-runs are stable
-    for p, target in sorted(raw_files(year), key=lambda x: (x[0] != x[1], x[0])):
+    for p, target in sorted(raw_files(year, stage), key=lambda x: (x[0] != x[1], x[0])):
         if target in plan.values():
             other = next(k for k, v in plan.items() if v == target)
             if other.read_bytes() != p.read_bytes():
@@ -295,17 +304,24 @@ def candidate_parties_2023() -> pd.DataFrame:
 
 def build() -> dict[str, pd.DataFrame]:
     party, cand = [], []
+
+    def tag(rows: list[dict], stage: str) -> list[dict]:
+        return [{**r, "count_stage": stage} for r in rows]
+
     for p in csv_files(2023, "party"):
-        party += parse_2023(p, "party")
+        party += tag(parse_2023(p, "party"), "final")
     for p in csv_files(2023, "candidate"):
-        cand += parse_2023(p, "candidate")
-    for p, _ in raw_files(2026):
-        party += parse_2026(p, "party")
-        cand += parse_2026(p, "candidate")
+        cand += tag(parse_2023(p, "candidate"), "final")
+    for stage in STAGE_DIRS:                       # 2026: preliminary now, final when its folder appears
+        if not raw_dir(2026, stage).exists():
+            continue
+        for p, _ in raw_files(2026, stage):
+            party += tag(parse_2026(p, "party"), stage)
+            cand += tag(parse_2026(p, "candidate"), stage)
 
     stg_party, stg_cand = pd.DataFrame(party), pd.DataFrame(cand)
     for label, df in (("party", stg_party), ("candidate", stg_cand)):
-        dup = df.duplicated(["election_year", "electorate", "section", "voting_place_raw", label])
+        dup = df.duplicated(["election_year", "count_stage", "electorate", "section", "voting_place_raw", label])
         if dup.any():
             bad = df[dup][["election_year", "electorate"]].drop_duplicates().values.tolist()
             raise ValueError(f"duplicate {label} rows (same electorate loaded twice?): {bad}")
@@ -314,7 +330,7 @@ def build() -> dict[str, pd.DataFrame]:
             df["election_year"].astype(str) + "|" + df["electorate"].map(slug) + "|" + df["section"] + "|" + df["voting_place_raw"].map(slug)
         )
 
-    place_cols = ["voting_place_id", "election_year", "electorate", "electorate_no", "voting_place_raw", "suburb", "venue", "section", "place_kind"]
+    place_cols = ["voting_place_id", "election_year", "count_stage", "electorate", "electorate_no", "voting_place_raw", "suburb", "venue", "section", "place_kind"]
     stg_places = stg_party[place_cols].drop_duplicates().reset_index(drop=True)
     return {
         "stg_party_votes": stg_party,
@@ -329,7 +345,7 @@ def checks(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     rows = []
     for name in ("stg_party_votes", "stg_candidate_votes"):
         df = tables[name]
-        by = df.groupby(["election_year", "electorate", "place_kind"])["votes"].sum().unstack(fill_value=0)
+        by = df.groupby(["election_year", "count_stage", "electorate", "place_kind"])["votes"].sum().unstack(fill_value=0)
         by["places_sum"] = by.drop(columns="total").sum(axis=1)
         by["diff"] = by["places_sum"] - by["total"]
         by.insert(0, "table", name)
@@ -381,16 +397,17 @@ NATIONAL_2023 = RAW / "ge2023" / "_turnout" / "ge2023_party_votes_national.csv"
 NATIONAL = {2023: NATIONAL_2023, 2026: NATIONAL_2026}
 
 
-def checks_party_totals(tables: dict[str, pd.DataFrame], year: int) -> pd.DataFrame:
+def checks_party_totals(tables: dict[str, pd.DataFrame], year: int, stage: str | None = None) -> pd.DataFrame:
     """Independent check: sum of parsed electorate totals per party vs the published national party table.
 
     The national tables come from the Commission's results pages (2023 official, 2026 preliminary). Party names
     are passed through clean_party() so spelling variants line up with staging.
     """
+    stage = stage or ("final" if year == 2023 else "preliminary")
     pub = pd.read_csv(NATIONAL[year])
     pub["party"] = pub["party"].map(clean_party)
     ours = (
-        tables["stg_party_votes"].query("election_year == @year and place_kind == 'total'")
+        tables["stg_party_votes"].query("election_year == @year and count_stage == @stage and place_kind == 'total'")
         .groupby("party")["votes"].sum().rename("staging_votes")
     )
     d = pub.set_index("party")[["party_votes"]].join(ours, how="outer")
@@ -398,8 +415,8 @@ def checks_party_totals(tables: dict[str, pd.DataFrame], year: int) -> pd.DataFr
     return d.reset_index()
 
 
-def checks_party_totals_2026(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
-    return checks_party_totals(tables, 2026)
+def checks_party_totals_2026(tables: dict[str, pd.DataFrame], stage: str = "preliminary") -> pd.DataFrame:
+    return checks_party_totals(tables, 2026, stage)
 
 
 def write(tables: dict[str, pd.DataFrame]) -> None:
@@ -413,8 +430,9 @@ if __name__ == "__main__":
     import sys
 
     if "--rename-only" in sys.argv:
-        for y in (2023, 2026):
-            rename_raw(y, dry_run="--dry-run" in sys.argv)
+        for y, stage in ((2023, "preliminary"), (2026, "preliminary"), (2026, "final")):
+            if raw_dir(y, stage).exists():
+                rename_raw(y, dry_run="--dry-run" in sys.argv, stage=stage)
         raise SystemExit
     t = build()
     write(t)

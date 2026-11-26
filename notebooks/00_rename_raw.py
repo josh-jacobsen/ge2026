@@ -61,7 +61,15 @@ for year in YEARS:
             rows.append({"year": year, "electorate": etl.electorate_of_xlsx(p), "kind": "workbook"})
 chk = pd.DataFrame(rows).value_counts().unstack(fill_value=0)
 display(chk.groupby(level="year").sum())
-bad = chk[(chk != 1).any(axis=1)]
+# 2023: one party file per electorate, and one candidate file too, except Port Waikato (its 2023 election was postponed,
+# so there are no candidate results for it). 2026: exactly one workbook per electorate.
+NO_CANDIDATE_FILE_2023 = {"Port Waikato"}
+c23, c26 = chk.loc[2023], chk.loc[2026]
+bad = pd.concat([
+    c23[(c23.party != 1) | ((c23.candidate != 1) & ~c23.index.isin(NO_CANDIDATE_FILE_2023))],
+    c23[c23.index.isin(NO_CANDIDATE_FILE_2023) & (c23.candidate != 0)],
+    c26[c26.workbook != 1],
+])
 assert bad.empty, bad
 
 # %% [markdown]
@@ -74,3 +82,15 @@ e = {y: {p.name.split("_", 1)[1].rsplit(".", 1)[0].rsplit("_", 1)[0] if y == 202
          for _, p in etl.raw_files(y)} for y in YEARS}
 print("only 2023:", sorted(e[2023] - e[2026]))
 print("only 2026:", sorted(e[2026] - e[2023]))
+
+# %% [markdown]
+# ## 6. Final 2026 results (when released)
+# Save the Commission's final files in `data/raw/ge2026_final/`, then run this cell to give them canonical names. They are
+# kept apart from the preliminary files (`data/raw/ge2026/`) so both counts stay available; notebook 01 tags every row
+# with its `count_stage`.
+
+# %%
+if etl.raw_dir(2026, "final").exists():
+    etl.rename_raw(2026, dry_run=True, stage="final")      # review, then re-run with dry_run=False
+else:
+    print("no data/raw/ge2026_final/ folder yet")

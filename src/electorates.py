@@ -159,13 +159,18 @@ def summarise_2023(x: pd.DataFrame, min_share: float = 20.0) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values(["roll", "electorate_2023"]).reset_index(drop=True)
 
 
-def winners_2026(candidate_votes: pd.DataFrame, kinds=("advance", "election_day")) -> pd.DataFrame:
-    """Electorate seat winner by candidate vote (2026, ordinary votes), with party and margin.
+def winners_2026(candidate_votes: pd.DataFrame, kinds=("advance", "election_day"), stage: str = "preliminary") -> pd.DataFrame:
+    """Electorate seat winner by candidate vote (2026), with party and margin.
 
-    The 2026 files name candidates without a party, so the party comes from
+    `kinds=None` uses the rows as given (already scoped by vote_scope.load); `stage` picks preliminary or final
+    when the table holds both. The 2026 files name candidates without a party, so the party comes from
     data/reference/ge2026_winner_parties.csv (winners only; source: the Commission's candidate list).
     """
-    d = candidate_votes[(candidate_votes.election_year == 2026) & candidate_votes.place_kind.isin(kinds)]
+    d = candidate_votes[candidate_votes.election_year == 2026]
+    if "count_stage" in d:
+        d = d[d.count_stage == stage]
+    if kinds is not None:
+        d = d[d.place_kind.isin(kinds)]
     t = d.groupby(["electorate", "candidate"], as_index=False)["votes"].sum().sort_values(["electorate", "votes"], ascending=[True, False])
     t["rank"] = t.groupby("electorate").cumcount()
     win = t[t["rank"] == 0].drop(columns="rank")

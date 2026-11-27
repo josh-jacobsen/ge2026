@@ -394,6 +394,7 @@ def checks_turnout_2023(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
 
 NATIONAL_2026 = RAW / "ge2026" / "_turnout" / "ge2026_party_votes_national_preliminary.csv"
 NATIONAL_2023 = RAW / "ge2023" / "_turnout" / "ge2023_party_votes_national.csv"
+NATIONAL_2026_FINAL = RAW / "ge2026_final" / "_turnout" / "ge2026_party_votes_national_final.csv"  # official count, not yet the gazetted declaration
 NATIONAL = {2023: NATIONAL_2023, 2026: NATIONAL_2026}
 
 
@@ -404,7 +405,7 @@ def checks_party_totals(tables: dict[str, pd.DataFrame], year: int, stage: str |
     are passed through clean_party() so spelling variants line up with staging.
     """
     stage = stage or ("final" if year == 2023 else "preliminary")
-    pub = pd.read_csv(NATIONAL[year])
+    pub = pd.read_csv(NATIONAL_2026_FINAL if (year == 2026 and stage == "final") else NATIONAL[year])
     pub["party"] = pub["party"].map(clean_party)
     ours = (
         tables["stg_party_votes"].query("election_year == @year and count_stage == @stage and place_kind == 'total'")

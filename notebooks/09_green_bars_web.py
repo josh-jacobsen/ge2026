@@ -27,7 +27,9 @@ import json, sys
 from pathlib import Path
 
 ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
+sys.path.insert(0, str(ROOT / "src"))
 import pandas as pd
+import candidates, electorates
 
 PARTY = "Green Party"
 SUBTITLE = "all votes including special votes; 2026 is the final count"   # edit if the count basis changes
@@ -47,7 +49,23 @@ assert all(s.max() - s.min() < 0.03 for s in nat.values()), "national share not 
 nat = {y: float(s.mean()) for y, s in nat.items()}
 print(f"national {PARTY} party share: 2023 {nat[2023]:.2f}%  2026 {nat[2026]:.2f}%  ({len(t)} electorates)")
 
-rows = [{"name": r.electorate_2026, "maori": r.roll == "maori", "focus": bool(r.focus),
+# Green candidate names under each electorate: 2026 from the Commission's candidate list, 2023 from the staged 2023 results
+# (renamed to the 2026 electorate names), both shown as "Given Surname"
+c26 = pd.read_csv(ROOT / "data/reference/ge2026_green_candidates.csv")
+c23 = electorates.align_2023(pd.read_parquet(ROOT / "data/staging/stg_candidate_party.parquet").query("party == @PARTY"))
+assert c26.electorate.is_unique and c23.electorate.is_unique
+assert set(c26.electorate) <= set(t.electorate_2026), "a 2026 candidate's electorate is not in the 2026 list"
+gone = sorted(set(c23.electorate) - set(t.electorate_2026))   # 2023 seats with no 2026 counterpart (Ōhāriu) have no row on this page
+c23 = c23[c23.electorate.isin(t.electorate_2026)]
+print("2023 Green candidates in seats not on this page:", gone)
+n26 = dict(zip(c26.electorate, c26.candidate.map(candidates.display_name)))
+n23 = dict(zip(c23.electorate, c23.candidate.map(candidates.display_name)))
+# a candidate name exists exactly where the page shows a candidate bar
+assert {e for e, v in zip(t.electorate_2026, t.cand_2026) if pd.notna(v)} == set(n26), "2026 candidate bars and names disagree"
+assert {e for e, v in zip(t.electorate_2026, t.cand_2023) if pd.notna(v)} == set(n23), "2023 candidate bars and names disagree"
+print(f"Green candidate names: {len(n26)} in 2026, {len(n23)} in 2023; same person both years in {sum(n26[e] == n23[e] for e in set(n26) & set(n23))} seats")
+
+rows = [{"name": r.electorate_2026, "n26": n26.get(r.electorate_2026), "n23": n23.get(r.electorate_2026), "maori": r.roll == "maori", "focus": bool(r.focus),
          "p23": r.party_2023, "p26": r.party_2026,
          "c23": None if pd.isna(r.cand_2023) else r.cand_2023,
          "c26": None if pd.isna(r.cand_2026) else r.cand_2026} for r in t.itertuples()]
@@ -81,18 +99,20 @@ h1{font-size:20px;margin:0 0 2px}
 .btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
 .arrow{font-size:11px;color:var(--muted);min-width:10px}
-input[type=search]{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 10px;border-radius:8px;font:inherit;min-width:150px}
+input[type=search]{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:6px 10px;border-radius:8px;font:inherit;min-width:220px}
 label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);cursor:pointer}
-.axis{display:grid;grid-template-columns:48px 150px 1fr;color:var(--muted);font-size:11px;margin-top:6px;align-items:end}
+.axis{display:grid;grid-template-columns:48px 170px 1fr;color:var(--muted);font-size:11px;margin-top:6px;align-items:end}
 .rankhead{text-align:right;padding-right:8px;line-height:1.15}
 .ticks{position:relative;height:16px}
 .ticks span{position:absolute;transform:translateX(-50%)}
-.row{display:grid;grid-template-columns:48px 150px 1fr;align-items:center;border-top:1px solid var(--line);padding:3px 0}
+.row{display:grid;grid-template-columns:48px 170px 1fr;align-items:center;border-top:1px solid var(--line);padding:3px 0}
 .rank{text-align:right;padding-right:8px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted)}
 .row.focus .rank{color:var(--fg)}
 .row.focus{background:var(--focus)}
-.name{font-size:12px;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row.focus .name{font-weight:700}
+.name{padding-right:8px;overflow:hidden;line-height:1.2}
+.name b{display:block;font-weight:inherit;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name small{display:block;font-size:10px;color:var(--muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.focus .name b{font-weight:700}
 .bars{position:relative;padding:1px 0}
 .bar{display:flex;align-items:center;height:9px;margin:1px 0}
 .bar i{display:block;height:9px;border-radius:0 2px 2px 0;min-width:1px}
@@ -100,7 +120,7 @@ label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);curs
 .bar.none em{font-style:italic}
 .nat{position:absolute;top:0;bottom:0;border-left:1px dashed}
 .legend-note{color:var(--muted);font-size:12px;margin-top:14px}
-@media (max-width:560px){.axis,.row{grid-template-columns:44px 90px 1fr}.name{font-size:11px}}
+@media (max-width:560px){.axis,.row{grid-template-columns:44px 110px 1fr}.name b{font-size:11px}}
 </style>
 </head>
 <body>
@@ -109,7 +129,7 @@ label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--muted);curs
 <p class="sub">2023 vs 2026 (__SUBTITLE__). Shaded: __FOCUS_NOTE__. (M) = Māori electorate.</p>
 <div class="controls" id="sorts" role="group" aria-label="Sort by"></div>
 <div class="controls">
-  <input type="search" id="q" placeholder="Find an electorate" aria-label="Find an electorate">
+  <input type="search" id="q" placeholder="Find an electorate or candidate" aria-label="Find an electorate or candidate">
   <label class="chk"><input type="checkbox" id="onlyFocus"> Focus seats only</label>
   <label class="chk"><input type="checkbox" id="focusFirst"> Focus seats first</label>
 </div>
@@ -195,19 +215,24 @@ function render() {
   assignRanks();
   $("rankhead").innerHTML = rankLabel();
   const q = $("q").value.trim().toLowerCase();
-  let rows = DATA.filter(r => r.name.toLowerCase().includes(q) && (!$("onlyFocus").checked || r.focus));
+  let rows = DATA.filter(r => (r.name + " " + (r.n26 || "") + " " + (r.n23 || "")).toLowerCase().includes(q) && (!$("onlyFocus").checked || r.focus));
   rows.sort(cmp);
   if ($("focusFirst").checked) rows.sort((a, b) => (b.focus - a.focus));   // stable: keeps the chosen order inside each group
   const host = $("rows"); host.textContent = "";
+  const yr = state.key.endsWith("23") ? 2023 : 2026;
   const grid = "linear-gradient(to right, var(--line) 1px, transparent 1px)";
   for (const r of rows) {
     const row = document.createElement("div"); row.className = "row" + (r.focus ? " focus" : "");
-    row.title = `${r.name}\nParty vote 2023: ${fmt(r.p23)}   2026: ${fmt(r.p26)}\nCandidate vote 2023: ${fmt(r.c23)}   2026: ${fmt(r.c26)}` +
+    row.title = `${r.name}\nGreen candidate 2026: ${r.n26 || "none"}   2023: ${r.n23 || "none"}\nParty vote 2023: ${fmt(r.p23)}   2026: ${fmt(r.p26)}\nCandidate vote 2023: ${fmt(r.c23)}   2026: ${fmt(r.c26)}` +
       (r.gap26 == null ? "" : `\nGap 2026 (candidate − party): ${r.gap26.toFixed(1)} pts`);
     const rk = document.createElement("div"); rk.className = "rank"; rk.textContent = r.rank == null ? "–" : r.rank;
     rk.title = r.rank == null ? "no value for this series" : `${r.rank} of ${DATA.filter(d => d[state.key] != null).length}`;
     row.append(rk);
-    const n = document.createElement("div"); n.className = "name"; n.textContent = r.name + (r.maori ? " (M)" : ""); row.append(n);
+    const n = document.createElement("div"); n.className = "name";
+    const nm = document.createElement("b"); nm.textContent = r.name + (r.maori ? " (M)" : "");
+    const cand = document.createElement("small");   // the Green candidate for the year being sorted on (2023 series -> 2023, otherwise 2026)
+    cand.textContent = `${yr}: ` + ((yr === 2023 ? r.n23 : r.n26) || "no Green candidate");
+    n.append(nm, cand); row.append(n);
     const bars = document.createElement("div"); bars.className = "bars";
     bars.style.backgroundImage = grid; bars.style.backgroundSize = (10 / MAX * 100) + "% 100%";
     for (const s of SERIES) {

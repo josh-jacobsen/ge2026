@@ -35,12 +35,12 @@ ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 sys.path.insert(0, str(ROOT / "src"))
 import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
-import electorates, plotstyle, vote_scope
+import electorates, focus_history as fh, plotstyle, vote_scope
 
 VOTE_SCOPE = "all"      # 2026 votes counted: "ordinary" or "all" (adds special + overseas)
 COUNT_STAGE = "final"  # 2026 count: "preliminary" or "final"
 SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
-YEARS = [2017, 2020, 2023, 2026]
+YEARS = fh.YEARS
 MAIN = ["National Party", "Labour Party", "Green Party", "ACT New Zealand", "New Zealand First Party", "The Opportunities Party (TOP)"]
 COLORS = {"National Party": "#00529f", "Labour Party": "#d82c20", "Green Party": "#098137", "ACT New Zealand": "#fdb913",
           "New Zealand First Party": "#111111", "The Opportunities Party (TOP)": "#7b3f9e", "Other": "#999999"}
@@ -48,14 +48,7 @@ SHORT = {"National Party": "National", "Labour Party": "Labour", "Green Party": 
          "New Zealand First Party": "NZ First", "The Opportunities Party (TOP)": "TOP", "Other": "Other"}
 pd.set_option("display.width", 220, "display.max_columns", 30, "display.max_rows", 200)
 
-# One name per party lineage (the Commission renamed or re-registered some parties between elections).
-CANON = {
-    "Conservative": "Conservative", "New Conservative": "Conservative", "New Conservatives": "Conservative",
-    "Māori Party": "Te Pāti Māori", "Te Pāti Māori": "Te Pāti Māori",
-    "NZ Outdoors Party": "NZ Outdoors", "NZ Outdoors & Freedom Party": "NZ Outdoors",
-    "Social Credit": "Social Credit", "Democrats for Social Credit": "Social Credit",
-}
-canon = lambda p: CANON.get(p, p)
+CANON, canon = fh.CANON, fh.canon   # one name per party lineage (renamed or re-registered between elections)
 
 
 def trend(ax, y, marker="o", **kw):
@@ -73,36 +66,11 @@ def trend(ax, y, marker="o", **kw):
 # One row per seat × year × vote type × party. Checks below fail loudly if a seat-year is missing a vote type.
 
 # %%
+ST = ROOT / "data/staging"
+# 2017/2020 from the reference CSV, 2023 from staging (all votes), 2026 by scope and stage; logic and tests live in src/focus_history.py
+seat, basis26 = fh.load_seat_table(SEATS, VOTE_SCOPE, COUNT_STAGE, root=ROOT)
 hist = pd.read_csv(ROOT / "data/reference/focus_seats_history.csv")
 hist = hist[hist.electorate.isin(SEATS)]
-rows = [hist.assign(basis="final").rename(columns={"party": "party_raw"})[["election_year", "electorate", "vote_type", "party_raw", "votes", "basis"]]]
-
-ST = ROOT / "data/staging"
-# 2023: every non-total row (reconciles exactly to the Commission's totals, tests/official_results/test_vote_scope_reconciles.py)
-p23 = pd.read_parquet(ST / "stg_party_votes.parquet")
-p23 = p23[(p23.election_year == 2023) & (p23.place_kind != "total") & p23.electorate.isin(SEATS)]
-rows.append(p23.groupby(["election_year", "electorate", "party"], as_index=False).votes.sum()
-            .rename(columns={"party": "party_raw"}).assign(vote_type="party", basis="final (all votes)"))
-c23 = pd.read_parquet(ST / "stg_candidate_party.parquet")
-c23 = c23[c23.electorate.isin(SEATS)]
-rows.append(c23.rename(columns={"party": "party_raw"})[["election_year", "electorate", "party_raw", "votes"]].assign(vote_type="candidate", basis="final (all votes)"))
-
-# 2026: scope and stage from the config; candidate parties from the Commission's candidate list
-p26 = vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE)
-p26 = p26[(p26.election_year == 2026) & p26.electorate.isin(SEATS)]
-basis26 = f"{COUNT_STAGE}, {VOTE_SCOPE} votes"
-rows.append(p26.groupby(["election_year", "electorate", "party"], as_index=False).votes.sum()
-            .rename(columns={"party": "party_raw"}).assign(vote_type="party", basis=basis26))
-k26 = vote_scope.load("stg_candidate_votes", VOTE_SCOPE, COUNT_STAGE)
-k26 = k26[(k26.election_year == 2026) & k26.electorate.isin(SEATS)].groupby(["election_year", "electorate", "candidate"], as_index=False).votes.sum()
-cl26 = pd.read_csv(ROOT / "data/reference/ge2026_focus_candidates.csv")
-k26 = k26.merge(cl26, on=["electorate", "candidate"], how="left")
-assert k26.party.notna().all(), k26[k26.party.isna()]
-rows.append(k26.rename(columns={"party": "party_raw"})[["election_year", "electorate", "party_raw", "votes"]].assign(vote_type="candidate", basis=basis26))
-
-seat = pd.concat(rows, ignore_index=True)
-seat["party"] = seat.party_raw.map(canon)
-seat = seat.groupby(["election_year", "electorate", "vote_type", "party", "basis"], as_index=False).votes.sum()
 
 # checks: every seat has both vote types in every year, and candidate votes are 85-100% of party votes
 chk = seat.groupby(["election_year", "electorate", "vote_type"]).votes.sum().unstack()

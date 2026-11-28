@@ -41,10 +41,18 @@ Python 3.12 via uv (pandas, numpy, matplotlib, folium, geopandas, jupytext, pyte
 - Left-minus-right party vote lead (2023 official all votes, 2026 final): national -12.1 to +1.5; general roll -16.1 to -5.2. North Shore -33.8 to -21.5; Northcote -16.0 to +2.5; East Coast Bays -46.2 to -31.7; Upper Harbour -28.6 to -18.3.
 - National party vote 2023 to 2026 final: National 38.1 to 28.4; Labour 26.9 to 29.9; Green 11.6 to 14.1; ACT 8.6 to 10.5; NZ First 6.1 to 9.6; TOP 2.2 to 6.1.
 
+## Campaign effort (notebook 13)
+- Data (local only, not in git): 16 weekly exports from the campaign tool pasted by the user into `data/raw/campaign/<seat>_<year>_<channel>.csv` (4 seats x 2023/2026 x door_knocking/phone_calls). Columns: Contact Week, Attempts, Contacts, Contact %, Meaningful Interactions, MI %. Assumed to be Green campaign activity; the user has not confirmed that.
+- `src/campaign.py` parses and validates each export (ISO weeks, contacts <= attempts, rates match counts) and aligns weeks by `weeks_to_election` (0 = week containing election day: 14 Oct 2023, 7 Nov 2026, both Saturdays; 2026 week N = 2023 week N-4). Rows after election week are dropped (all from 2023). Tests: `tests/unit/test_campaign.py`; the real-data tests check per-file totals pinned in the local, gitignored `data/raw/campaign/pinned_totals.json`.
+- Findings: total effort roughly tripled from 2023 to 2026, mostly because door knocking went from token to a main channel and phone volume about doubled. Phone contact rates fell and the meaningful share of contacts rose. 2023 door-knocking rates rest on too few contacts to compare. Door-knocking exports end 1-2 weeks before election week in every seat. Exact figures are sensitive and not recorded here; rerun notebook 13 locally.
+- Caveats: missing weeks mean zero or not recorded; the tool's definitions and the seat areas may differ between years; four seats cannot show effort changed a result.
+- **Sensitive, never commit.** `data/raw/campaign/` is gitignored; the exports live on the user's machine only (the repo is public on GitHub). Tests that read them skip when the folder is absent.
+- Open: confirm the data is Green campaign activity; the user said the other analyses come next.
+
 ## Next steps
 1. Final voting-place files expected Friday 18 December (per the Commission). When the user supplies them: stage them, then move 04 (place sections), 07 (place sections), 11 and 12 to the final stage and lift the ordinary/final guard accordingly.
 2. Te Pāti Māori Hutt South fell from 113 (preliminary) to 76 (final); unexplained. A test pins it (`{"Hutt South": -37}`).
 3. Data gaps: MANA (North Shore 2017) and Ban1080 (Northcote 2017) counts; TLP candidate code (Miriam Clements); national 2017 and 2020 party shares (`data/reference/national_party_share_history.csv`).
 4. Verify the Upper Harbour 2017 to 2020 boundary entry (flagged "check"); 192 voting places still unpinned (`src/geocode_retry.py` is the second geocoding pass).
 5. The user is checking the Te Pāti Māori / Green Māori-roll anomaly.
-6. Offered, not requested: refactor notebook 08 onto `focus_history`; switch the share maps to `maps.legend`.
+6. Offered, not requested: switch the share maps to `maps.legend`. (Notebook 08 now loads through `focus_history`; done in `f4566df`.)

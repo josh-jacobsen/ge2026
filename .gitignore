@@ -22,6 +22,9 @@ data/geo/*.html
 data/raw/*/_duplicates/
 data/raw/**/*.renaming
 
+# Sensitive: campaign-tool exports (door knocking, phone calls). Never commit; keep local only.
+data/raw/campaign/
+
 # Tracked on purpose:
 #   data/raw/        original Commission downloads (4.5 MB; the site blocks scripted downloads, so keep them)
 #   data/geo/geocode_cache.csv   ~1 hour of Nominatim lookups plus any manual lat/lon fixes

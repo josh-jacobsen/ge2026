@@ -73,20 +73,31 @@ def show(b, cols, title):
 # `lead` = left share minus right share (positive = the left bloc is ahead in the seat).
 
 # %%
-show(party_b, [LEFT, RIGHT, "Other", "lead (Left - Right)", "Left of two-bloc"], "Party vote, % of all valid votes")
+# Every party's share, then its bloc total (Left = Labour + Green + TOP, Right = National + ACT + NZ First), for 2017 onwards.
+party_parts = fh.bloc_shares(seat, "party")[["Left of two-bloc"]].join(fh.bloc_breakdown(seat, "party"))
+party_parts = party_parts[[c for c in party_parts.columns if c != "Left of two-bloc"] + ["Left of two-bloc"]]
+assert np.allclose(party_parts[[LEFT, RIGHT]], party_b[[LEFT, RIGHT]])
+assert set(party_parts.index.get_level_values("election_year")) == set(YEARS) and min(YEARS) == 2017
+pd.set_option("display.max_columns", 80, "display.width", 400)
+show(party_parts, list(party_parts.columns), "Party vote, % of all valid votes: each party, then its bloc total")
 
-fig, axes = plt.subplots(1, 4, figsize=(15, 3.8), sharey=True)
+# Party colours as in notebook 08. Thin lines = each party; thick dashed lines = the two blocs (their sums).
+PARTY_C = {"Labour": "#d82c20", "Green": "#098137", "TOP": "#7b3f9e", "National": "#00529f", "ACT": "#fdb913", "NZ First": "#111111"}
+fig, axes = plt.subplots(1, 4, figsize=(17, 4.6), sharey=True)
 for ax, s in zip(axes, SEATS):
-    d = party_b.loc[s]
-    plotstyle.trend_line(ax, YEARS, d[LEFT].reindex(YEARS), PROVISIONAL_2026, color=LEFT_C, label="Left bloc", ms=7)
-    plotstyle.trend_line(ax, YEARS, d[RIGHT].reindex(YEARS), PROVISIONAL_2026, color=RIGHT_C, label="Right bloc", ms=7)
+    d = party_parts.loc[s]
+    for p, c in PARTY_C.items():
+        plotstyle.trend_line(ax, YEARS, d[p].reindex(YEARS), PROVISIONAL_2026, color=c, label=p, ms=4, lw=1.2)
+    plotstyle.trend_line(ax, YEARS, d[LEFT].reindex(YEARS), PROVISIONAL_2026, color=LEFT_C, label="Left bloc", ms=7, lw=3, ls="--")
+    plotstyle.trend_line(ax, YEARS, d[RIGHT].reindex(YEARS), PROVISIONAL_2026, color=RIGHT_C, label="Right bloc", ms=7, lw=3, ls="--")
     ax.axhline(50, color="grey", lw=.6, ls=":")
     ax.set_title(s); ax.set_xticks(YEARS); ax.tick_params(axis="x", labelrotation=45); ax.grid(alpha=.3)
 axes[0].set_ylabel("share of party vote (%)")
-handles = [l for l in axes[0].lines if l.get_label() in ("Left bloc", "Right bloc")]
-axes[0].legend(handles, [h.get_label() for h in handles], fontsize=8)
-fig.suptitle(f"Party vote by bloc (hollow 2026 = {basis26}; dotted line = 50%)")
-plt.tight_layout(); plt.show()
+names = list(PARTY_C) + ["Left bloc", "Right bloc"]
+handles = [next(l for l in axes[0].lines if l.get_label() == n) for n in names]
+fig.legend(handles, names, fontsize=9, ncol=len(names), loc="lower center", frameon=False)
+fig.suptitle(f"Party vote by party and bloc (thick dashed = bloc total; hollow 2026 = {basis26}; dotted line = 50%)")
+plt.tight_layout(rect=(0, 0.07, 1, 1)); plt.show()
 
 # %% [markdown]
 # ## 3. Is the left bloc's rise really about TOP?
@@ -125,13 +136,14 @@ plt.tight_layout(); plt.show()
 
 # %% [markdown]
 # ## 5. Which parties moved the blocs, 2023 → 2026
-# Change in each party's share of the party vote (ordinary votes in both years, so special votes do not distort it).
+# Change in each party's share of the party vote, all votes in both years (2023 official, 2026 final electorate totals), so special
+# and overseas votes are counted in both. Ordinary-only 2026 exists for the preliminary count only: section 6 and the benchmark
+# table in section 7 keep those columns for reference.
 
 # %%
-pv = vote_scope.load("stg_party_votes", "ordinary", "preliminary")   # ordinary-only 2026 exists for the preliminary count only
+pv = vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE)   # same basis as sections 1-4 (all/final: special votes in both years)
 pv = pv[pv.electorate.isin(SEATS)]
 pv = pv[pv.election_year.isin([2023, 2026])]
-# 2023 here is also ordinary-only (vote_scope.load returns 2023 ordinary rows for scope "ordinary")
 six = fh.BLOCS[LEFT] + fh.BLOCS[RIGHT]
 sh = pv.groupby(["electorate", "election_year", "party"]).votes.sum()
 sh = (sh / sh.groupby(["electorate", "election_year"]).transform("sum") * 100).unstack("election_year")

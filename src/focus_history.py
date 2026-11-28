@@ -85,3 +85,26 @@ def bloc_shares(seat: pd.DataFrame, vote_type: str, blocs: dict[str, list[str]] 
     first, second = list(blocs)
     out[f"lead ({first} - {second})"] = out[first] - out[second]
     return out
+
+
+SHORT = {"Labour Party": "Labour", "Green Party": "Green", "The Opportunities Party (TOP)": "TOP",
+         "National Party": "National", "ACT New Zealand": "ACT", "New Zealand First Party": "NZ First"}
+
+
+def bloc_breakdown(seat: pd.DataFrame, vote_type: str, blocs: dict[str, list[str]] = BLOCS) -> pd.DataFrame:
+    """Per seat × year: each bloc member's % of ALL valid votes of that type, followed by its bloc total, then `Other` and the lead.
+    Columns read Labour, Green, TOP, Left, National, ACT, NZ First, Right, Other, lead. A member that stood no list or candidate is 0."""
+    d = seat[seat.vote_type == vote_type]
+    keys = ["electorate", "election_year"]
+    total = d.groupby(keys).votes.sum()
+    share = d.groupby(keys + ["party"]).votes.sum().unstack("party").reindex(total.index).fillna(0).div(total, axis=0) * 100
+    b = bloc_shares(seat, vote_type, blocs)
+    out = pd.DataFrame(index=total.index)
+    for name, parties in blocs.items():
+        for p in parties:
+            out[SHORT.get(p, p)] = share[p] if p in share else 0.0
+        out[name] = b[name]
+    out["Other"] = b["Other"]
+    first, second = list(blocs)
+    out[f"lead ({first} - {second})"] = b[f"lead ({first} - {second})"]
+    return out

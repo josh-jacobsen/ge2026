@@ -40,3 +40,19 @@ def test_history_file_has_every_focus_seat_year_and_vote_type():
         for seat in seats:
             for kind in ("party", "candidate"):
                 assert got.loc[(year, seat, kind)] > 25_000, (year, seat, kind)
+
+
+def test_bloc_breakdown_members_add_to_their_bloc_and_match_bloc_shares():
+    d = seat_rows()
+    b = fh.bloc_breakdown(d, "party").loc[("X", 2023)]
+    assert abs(b["Labour"] + b["Green"] + b["TOP"] - b["Left"]) < 1e-9
+    assert abs(b["National"] + b["ACT"] + b["NZ First"] - b["Right"]) < 1e-9
+    assert abs(b["Left"] + b["Right"] + b["Other"] - 100) < 1e-9
+    assert b["Left"] == fh.bloc_shares(d, "party").loc[("X", 2023), "Left"]
+    assert list(fh.bloc_breakdown(d, "party").columns) == ["Labour", "Green", "TOP", "Left", "National", "ACT", "NZ First", "Right", "Other", "lead (Left - Right)"]
+
+
+def test_bloc_breakdown_gives_zero_for_a_party_that_stood_nobody():
+    d = seat_rows()
+    d = d[d.party != "The Opportunities Party (TOP)"]
+    assert fh.bloc_breakdown(d, "party").loc[("X", 2023), "TOP"] == 0

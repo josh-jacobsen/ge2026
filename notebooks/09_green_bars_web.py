@@ -38,6 +38,9 @@ SRC = ROOT / "data/staging/green_electorate_comparison.csv"
 OUT = ROOT / "data/geo/green_electorates.html"
 
 t = pd.read_csv(SRC)
+assert "basis" in t.columns and (t.basis == "final all").all(), (
+    f"{SRC.name} was not written by notebook 06 on the final count with all votes (basis={t.get('basis', pd.Series(['missing'])).unique()}): "
+    "restart the kernel and re-run notebook 06 from the top")
 need = ["electorate_2026", "party_2023", "party_2026", "cand_2023", "cand_2026", "party_vs_nat_2023", "party_vs_nat_2026", "roll", "focus"]
 missing = [c for c in need if c not in t.columns]
 assert not missing, f"re-run notebook 06; missing columns {missing}"

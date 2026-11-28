@@ -41,6 +41,7 @@ pd.set_option("display.width", 200, "display.max_columns", 30, "display.max_rows
 
 pv = vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE)
 print(vote_scope.describe(VOTE_SCOPE, COUNT_STAGE))
+BASIS = "all" if VOTE_SCOPE == "all" else "ordinary"   # used in chart labels
 rel = pd.read_csv(ROOT / "data/reference/electorate_relationships_2026.csv")
 # Electorates are compared by name, using the Commission's list of 2025 name changes for the 10 renamed seats
 # (`electorates.PREDECESSOR`, e.g. East Coast -> East Cape). The boundary review moved some of them, so `overlap`
@@ -75,7 +76,7 @@ f["overlap"] = f.electorate.map(overlap)
 top = f.sort_values(2026, ascending=False).head(TOP_N)
 display(top.round(1))
 ax = top.set_index("electorate")[2026].iloc[::-1].plot.barh(figsize=(8, 6), color="#2a9d8f")
-ax.set_xlabel(f"{FOCUS} share of ordinary party votes, 2026 (%)")
+ax.set_xlabel(f"{FOCUS} share of {BASIS} party votes, 2026 (%)")
 ax.set_title(f"{FOCUS}: strongest {TOP_N} electorates, 2026")
 plt.tight_layout(); plt.show()
 
@@ -125,7 +126,7 @@ win["differs"] = win.party != win.party_vote_leader
 display(win.party.value_counts().to_frame("seats won"))
 print(f"{win.differs.sum()} of {len(win)} seats were won by a different party than led the party vote:")
 display(win[win.differs][["candidate", "party", "party_vote_leader", "margin"]])
-print("Narrowest seat margins (ordinary votes only; special votes can still change these):")
+print(f"Narrowest seat margins ({BASIS}" + ("; special votes can still change these)" if VOTE_SCOPE == "ordinary" else ")"))
 display(win.sort_values("margin").head(8)[["candidate", "party", "margin"]])
 
 # %% [markdown]
@@ -139,13 +140,14 @@ fig, ax = plt.subplots(figsize=(8, 18))
 im = ax.imshow(h.values, aspect="auto", cmap="viridis")
 ax.set_xticks(range(len(h.columns)), h.columns, rotation=45, ha="right")
 ax.set_yticks(range(len(h)), h.index, fontsize=7)
-fig.colorbar(im, label="share of ordinary party votes (%)", shrink=0.5)
+fig.colorbar(im, label=f"share of {BASIS} party votes (%)", shrink=0.5)
 ax.set_title("Party share by electorate, 2026")
 plt.tight_layout(); plt.show()
 
 # %% [markdown]
-# ## 6. How many ordinary votes (comparable electorates)
-# Ordinary votes only, so this is a rough guide to turnout, not turnout itself: 2026 has no special votes yet.
+# ## 6. How many votes (comparable electorates)
+# Valid votes on the chosen basis (all votes in both years when `VOTE_SCOPE="all"`, ordinary votes only otherwise, which
+# understates 2026 until special votes are counted). A rough guide to turnout, not turnout itself: enrolment is not in the data.
 
 # %%
 v = t.groupby(["election_year", "electorate"]).valid.first().unstack(level=0)

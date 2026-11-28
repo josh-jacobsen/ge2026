@@ -48,6 +48,7 @@ ST = ROOT / "data/staging"
 pv = electorates.align_2023(vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE))
 cv = electorates.align_2023(vote_scope.load("stg_candidate_votes", VOTE_SCOPE, COUNT_STAGE))
 print(vote_scope.describe(VOTE_SCOPE, COUNT_STAGE))
+BASIS = "all" if VOTE_SCOPE == "all" else "ordinary"   # used in chart labels and printed text
 cp23 = electorates.align_2023(pd.read_parquet(ST / "stg_candidate_party.parquet"))
 cp26 = pd.read_csv(ROOT / "data/reference/ge2026_green_candidates.csv")
 roll = pd.read_csv(ROOT / "data/reference/electorate_relationships_2026.csv").set_index("electorate_2026").roll
@@ -69,7 +70,7 @@ gen = [e for e in tot.index if e in roll.index and roll[e] == "general" or e not
 gen_party = {y: grn.loc[gen, y].sum() / tot.loc[gen, y].sum() * 100 for y in (2023, 2026)}
 gen_party_swing = gen_party[2026] - gen_party[2023]
 print(f"General-roll seats only:               2023 {gen_party[2023]:.2f}%  2026 {gen_party[2026]:.2f}%  swing {gen_party_swing:+.2f} pts")
-print(f"National {PARTY} party vote (ordinary): 2023 {nat_party[2023]:.2f}%  2026 {nat_party[2026]:.2f}%  swing {nat_party_swing:+.2f} pts")
+print(f"National {PARTY} party vote ({BASIS}): 2023 {nat_party[2023]:.2f}%  2026 {nat_party[2026]:.2f}%  swing {nat_party_swing:+.2f} pts")
 
 # %% [markdown]
 # ## 2. Candidate vote share where Greens stood
@@ -125,6 +126,7 @@ t["roll"] = roll
 t["overlap"] = overlap
 t["focus"] = t.index.isin(FOCUS_SEATS)
 assert len(t) == 71 and t.party_2023.notna().all() and t.party_2026.notna().all()
+t["basis"] = f"{COUNT_STAGE} {VOTE_SCOPE}"      # notebook 09 refuses a CSV that is not final/all, so a stale run cannot reach the web page
 t.round(2).to_csv(ST / "green_electorate_comparison.csv")
 print(f"{len(t)} electorates -> data/staging/green_electorate_comparison.csv")
 
@@ -189,7 +191,7 @@ for tick, name in zip(ax.get_yticklabels(), order):
 ax.axvline(nat_party[2023], color="#a8d5ba", ls="--", lw=1); ax.axvline(nat_party[2026], color="#1b7f4b", ls="--", lw=1)
 ax.set_ylim(-0.6, len(order) - 0.4)
 ax.set_xlabel(f"{PARTY} share of valid votes (%)")
-ax.set_title(f"{PARTY}: party vote and candidate vote by electorate, 2023 vs 2026 (ordinary votes)")
+ax.set_title(f"{PARTY}: party vote and candidate vote by electorate, 2023 vs 2026 ({BASIS} votes)")
 ax.legend(loc="lower right"); ax.grid(axis="x", alpha=0.3)
 plt.tight_layout(); plt.show()
 
@@ -252,7 +254,7 @@ print(f"Median gap across the {len(g)} seats contested both years: 2023 {g.gap_2
 
 # %% [markdown]
 # ## 9. Every candidate in the focus seats
-# Candidate vote, ordinary votes. `party` for 2023 comes from the staged 2023 files, for 2026 from the reference list.
+# Candidate vote (basis as set by VOTE_SCOPE). `party` for 2023 comes from the staged 2023 files, for 2026 from the reference list.
 
 # %%
 focus_cp = {2023: cp23[cp23.electorate.isin(FOCUS_SEATS)][["electorate", "candidate", "party"]],

@@ -13,8 +13,8 @@
 # %% [markdown]
 # # 06 – Green Party: four North Shore seats in national context
 # Party vote **and** candidate vote, 2023 → 2026, for every electorate, with `FOCUS_SEATS` highlighted.
-# Ordinary votes only (`advance` + `election_day`): 2026 is preliminary with no special votes, so the figures
-# are like-for-like but not final. Shares, not counts, so turnout differences don't matter.
+# Basis set by `VOTE_SCOPE` / `COUNT_STAGE`: currently all votes (special included) and the final 2026 count, like 2023's all votes.
+# (`"ordinary"` / `"preliminary"` gives the ordinary-only view.) Shares, not counts, so turnout differences don't matter.
 #
 # Definitions
 # * **party share** = Green party votes / all valid party votes in the seat.
@@ -39,8 +39,8 @@ import matplotlib.pyplot as plt
 import electorates, plotstyle, vote_scope
 
 PARTY = "Green Party"
-VOTE_SCOPE = "ordinary"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
-COUNT_STAGE = "preliminary"  # 2026 count: "preliminary" or "final" (data/raw/ge2026_final)
+VOTE_SCOPE = "all"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
+COUNT_STAGE = "final"  # 2026 count: "preliminary" or "final" (data/raw/ge2026_final)
 FOCUS_SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
 pd.set_option("display.width", 220, "display.max_columns", 30, "display.max_rows", 100)
 ST = ROOT / "data/staging"

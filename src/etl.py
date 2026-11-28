@@ -302,6 +302,31 @@ def candidate_parties_2023() -> pd.DataFrame:
     return pd.DataFrame(out)
 
 
+FINAL_OUT = RAW / "ge2026_final" / "out.csv"   # final count, special votes included, electorate totals only
+ELECTORATE_TOTAL = "electorate_total"          # place_kind of those rows: never a voting place, never in ORDINARY
+
+
+def parse_final_out(path: Path = FINAL_OUT) -> tuple[list[dict], list[dict]]:
+    """Final 2026 electorate totals (out.csv: id, electorate, type, name, votes) as staging rows.
+
+    One row per electorate and party / candidate with place_kind 'electorate_total' and count_stage 'final'. They hold
+    every vote counted (ordinary, special, overseas), so vote_scope serves them for scope "all" only.
+    """
+    d = pd.read_csv(path, dtype={"id": str, "electorate": str, "type": str, "name": str})
+    if d.isna().any().any() or not set(d["type"]) <= {"party", "candidate"}:
+        raise ValueError(f"{path}: missing values or unknown row type")
+    if d.duplicated(["electorate", "type", "name"]).any():
+        raise ValueError(f"{path}: duplicate electorate/type/name rows")
+    base = {"election_year": 2026, "count_stage": "final", "suburb": "", "section": "total", "place_kind": ELECTORATE_TOTAL}
+    out = {"party": [], "candidate": []}
+    for r in d.itertuples():
+        label = f"{r.electorate} FINAL (all votes)"
+        row = {**base, "electorate": r.electorate, "electorate_no": r.id, "voting_place_raw": label, "venue": label,
+               r.type: clean_party(r.name) if r.type == "party" else " ".join(r.name.split()), "votes": int(r.votes)}
+        out[r.type].append(row)
+    return out["party"], out["candidate"]
+
+
 def build() -> dict[str, pd.DataFrame]:
     party, cand = [], []
 
@@ -319,6 +344,9 @@ def build() -> dict[str, pd.DataFrame]:
             party += tag(parse_2026(p, "party"), stage)
             cand += tag(parse_2026(p, "candidate"), stage)
 
+    if FINAL_OUT.exists():
+        fp, fc = parse_final_out()
+        party, cand = party + fp, cand + fc
     stg_party, stg_cand = pd.DataFrame(party), pd.DataFrame(cand)
     for label, df in (("party", stg_party), ("candidate", stg_cand)):
         dup = df.duplicated(["election_year", "count_stage", "electorate", "section", "voting_place_raw", label])
@@ -331,7 +359,7 @@ def build() -> dict[str, pd.DataFrame]:
         )
 
     place_cols = ["voting_place_id", "election_year", "count_stage", "electorate", "electorate_no", "voting_place_raw", "suburb", "venue", "section", "place_kind"]
-    stg_places = stg_party[place_cols].drop_duplicates().reset_index(drop=True)
+    stg_places = stg_party[stg_party.place_kind != ELECTORATE_TOTAL][place_cols].drop_duplicates().reset_index(drop=True)
     return {
         "stg_party_votes": stg_party,
         "stg_candidate_votes": stg_cand,
@@ -345,6 +373,7 @@ def checks(tables: dict[str, pd.DataFrame]) -> pd.DataFrame:
     rows = []
     for name in ("stg_party_votes", "stg_candidate_votes"):
         df = tables[name]
+        df = df[df.place_kind != ELECTORATE_TOTAL]   # final out.csv has no place rows to sum: tested against the national table instead
         by = df.groupby(["election_year", "count_stage", "electorate", "place_kind"])["votes"].sum().unstack(fill_value=0)
         by["places_sum"] = by.drop(columns="total").sum(axis=1)
         by["diff"] = by["places_sum"] - by["total"]
@@ -405,10 +434,11 @@ def checks_party_totals(tables: dict[str, pd.DataFrame], year: int, stage: str |
     are passed through clean_party() so spelling variants line up with staging.
     """
     stage = stage or ("final" if year == 2023 else "preliminary")
+    kind = ELECTORATE_TOTAL if (year == 2026 and stage == "final") else "total"   # final out.csv rows are the totals
     pub = pd.read_csv(NATIONAL_2026_FINAL if (year == 2026 and stage == "final") else NATIONAL[year])
     pub["party"] = pub["party"].map(clean_party)
     ours = (
-        tables["stg_party_votes"].query("election_year == @year and count_stage == @stage and place_kind == 'total'")
+        tables["stg_party_votes"].query("election_year == @year and count_stage == @stage and place_kind == @kind")
         .groupby("party")["votes"].sum().rename("staging_votes")
     )
     d = pub.set_index("party")[["party_votes"]].join(ours, how="outer")

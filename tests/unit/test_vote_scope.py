@@ -57,3 +57,13 @@ def test_old_staging_without_count_stage_is_rejected(tmp_path):
     pd.DataFrame({"election_year": [2023], "place_kind": ["advance"], "votes": [1]}).to_parquet(tmp_path / "stg_party_votes.parquet")
     with pytest.raises(ValueError, match="count_stage"):
         vote_scope.load(staging=tmp_path)
+
+
+def test_final_electorate_totals_serve_scope_all_only(tmp_path):
+    rows = BASE + [(2026, "final", "electorate_total", 40)]
+    staging = _staging(tmp_path, rows)
+    df = vote_scope.load(scope="all", stage="final", staging=staging)
+    assert df[df.election_year == 2026].votes.sum() == 40          # the electorate total, not the preliminary rows
+    assert df[df.election_year == 2023].votes.sum() == 10 + 4      # 2023: every non-total row
+    with pytest.raises(ValueError, match="no ordinary-vote rows for 2026 final"):
+        vote_scope.load(scope="ordinary", stage="final", staging=staging)

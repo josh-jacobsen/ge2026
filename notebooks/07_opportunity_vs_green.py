@@ -12,7 +12,8 @@
 # * Shares add to 100, so every gain is someone else's loss. The **placebo** section compares Green with the other parties
 #   and with what an even draw from every party would give.
 # * Direct evidence needs voter-level data, such as the NZ Election Study.
-# * Ordinary votes only (`advance` + `election_day`): 2026 is preliminary with no special votes. Shares, not counts.
+# * Section 1 (electorate level) follows `VOTE_SCOPE` / `COUNT_STAGE`: currently all votes, final 2026 count. The voting-place
+#   sections are ordinary votes only (`advance` + `election_day`, preliminary 2026): special votes have no location. Shares, not counts.
 
 # %%
 import sys
@@ -26,8 +27,8 @@ import electorates, plotstyle, vote_scope
 
 GREEN, TOP = "Green Party", "The Opportunities Party (TOP)"
 FOCUS_SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
-VOTE_SCOPE = "ordinary"    # section 1 (electorate level): "ordinary" or "all" (adds special + overseas votes)
-COUNT_STAGE = "preliminary"  # section 1: 2026 count, "preliminary" or "final"
+VOTE_SCOPE = "all"    # section 1 (electorate level): "ordinary" or "all" (adds special + overseas votes)
+COUNT_STAGE = "final"  # section 1: 2026 count, "preliminary" or "final"
 PLACE_STAGE = "preliminary"  # sections 2+ (voting places) are ordinary votes only: specials have no location
 MIN_VOTES = 50         # ignore places with fewer ordinary party votes than this in either year (shares get noisy)
 N_BOOT = 2000          # bootstrap resamples for confidence intervals

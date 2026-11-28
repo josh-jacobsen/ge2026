@@ -149,3 +149,40 @@ def test_te_pati_maori_falls_only_where_known(party, prelim):
     # table, so out.csv is consistent; the preliminary Hutt South figure was probably wrong. Review if this ever changes.
     d = _change("Te Pāti Māori", party, prelim)
     assert d[d < 0].to_dict() == {"Hutt South": -37}
+
+
+# --- the staged final rows (what the notebooks read through vote_scope) -------------------------------------------------
+
+def test_staged_final_rows_match_out_csv(out, tables):
+    for table, kind, col in (("stg_party_votes", "party", "party"), ("stg_candidate_votes", "candidate", "candidate")):
+        d = tables[table]
+        d = d[(d.election_year == 2026) & (d.count_stage == "final")]
+        assert set(d.place_kind) == {etl.ELECTORATE_TOTAL}
+        want = out[out.type == kind].groupby(["electorate", "name"]).votes.sum()
+        got = d.groupby(["electorate", col]).votes.sum()
+        got.index.names = want.index.names
+        assert got.equals(want)
+
+
+def test_staged_final_party_totals_match_national_table(tables):
+    chk = etl.checks_party_totals(tables, 2026, "final")
+    assert not chk[["party_votes", "staging_votes"]].isna().any().any()
+    assert (chk["diff"] == 0).all()
+
+
+def test_final_rows_are_not_voting_places(tables):
+    assert etl.ELECTORATE_TOTAL not in set(tables["stg_voting_places"].place_kind)
+    chk = etl.checks(tables)
+    assert (chk["diff"] == 0).all()                      # place rows still sum to the preliminary / 2023 totals
+
+
+def test_vote_scope_all_final_and_electorate_seats_match_official(tables, national):
+    import electorates
+    import vote_scope
+
+    cv = vote_scope.load("stg_candidate_votes", "all", "final")
+    seats = electorates.winners_2026(cv, kinds=None, stage="final").party.value_counts().to_dict()
+    official = national.electorate_seats.dropna().astype(int).to_dict()
+    assert seats == official
+    pv = vote_scope.load("stg_party_votes", "all", "final")
+    assert pv[pv.election_year == 2026].votes.sum() == NATIONAL_TOTAL_PARTY_VOTES

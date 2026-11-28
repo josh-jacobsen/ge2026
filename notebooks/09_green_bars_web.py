@@ -30,7 +30,7 @@ ROOT = Path.cwd() if (Path.cwd() / "src").exists() else Path.cwd().parent
 import pandas as pd
 
 PARTY = "Green Party"
-SUBTITLE = "ordinary votes; 2026 is the preliminary count"   # edit when the final results are loaded
+SUBTITLE = "all votes including special votes; 2026 is the final count"   # edit if the count basis changes
 FOCUS_NOTE = "North Shore, Northcote, East Coast Bays, Upper Harbour"
 SRC = ROOT / "data/staging/green_electorate_comparison.csv"
 OUT = ROOT / "data/geo/green_electorates.html"

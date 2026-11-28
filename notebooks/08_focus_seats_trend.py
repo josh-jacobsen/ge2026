@@ -18,8 +18,8 @@
 # * 2017 and 2020: seat totals pasted from the Commission's results pages into `data/reference/focus_seats_history.csv`
 #   (final counts, special votes included). No voting-place detail, so this notebook works at seat level only.
 # * 2023: staged files, **all votes** (ordinary + special + overseas) so it matches the final 2017 and 2020 figures.
-# * 2026: staged files, `VOTE_SCOPE` / `COUNT_STAGE` as in the other notebooks. Until the final count, 2026 is
-#   **ordinary votes only**, so it is not like-for-like with the earlier years (section 2 measures how much that matters).
+# * 2026: staged files, `VOTE_SCOPE` / `COUNT_STAGE` as in the other notebooks. Currently the **final count, all votes**,
+#   like-for-like with the earlier years. With the preliminary count 2026 is ordinary votes only (section 2 measures how much that matters).
 #
 # **Comparability**
 # * Shares, not counts: turnout and enrolment differ between elections.
@@ -37,8 +37,8 @@ import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 import electorates, plotstyle, vote_scope
 
-VOTE_SCOPE = "ordinary"      # 2026 votes counted: "ordinary" or "all" (adds special + overseas)
-COUNT_STAGE = "preliminary"  # 2026 count: "preliminary" or "final"
+VOTE_SCOPE = "all"      # 2026 votes counted: "ordinary" or "all" (adds special + overseas)
+COUNT_STAGE = "final"  # 2026 count: "preliminary" or "final"
 SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
 YEARS = [2017, 2020, 2023, 2026]
 MAIN = ["National Party", "Labour Party", "Green Party", "ACT New Zealand", "New Zealand First Party", "The Opportunities Party (TOP)"]
@@ -230,11 +230,12 @@ display(win.drop(columns="valid").round(1).unstack("election_year").swaplevel(ax
 # ## 7. National context
 # Two benchmarks, both from the staged files (all 71/72 electorates' party votes added up):
 # * **National** = the country's party vote. The 2023 "official" column uses all votes and equals the Commission's national
-#   result (checked by `tests/official_results`). 2026 has ordinary votes only until the final count.
+#   result (checked by `tests/official_results`). 2026 "final" is the official final result (all votes), checked against the Commission's table.
 # * **General roll** = the same, leaving out the 7 Māori electorates. It is the fairer yardstick for these four general
 #   seats, because the Māori seats swing very differently (Green and Te Pāti Māori surged there in 2026).
-# Every swing uses **ordinary votes in both years**, so special votes (which lift the Greens by about 1 point in these seats,
-# section 2) do not distort it. For 2017 and 2020, put the Commission's national results in
+# Every swing compares like with like: **all votes in both years** once the final 2026 count is loaded (`VOTE_SCOPE="all"`,
+# `COUNT_STAGE="final"`), otherwise **ordinary votes in both years**, so special votes (which lift the Greens by about 1 point
+# in these seats, section 2) never distort it. For 2017 and 2020, put the Commission's national results in
 # `data/reference/national_party_share_history.csv` (columns `election_year, party, share`) and they are added as columns.
 
 # %%
@@ -244,10 +245,17 @@ ORD = ["advance", "election_day"]
 allp = pd.read_parquet(ST / "stg_party_votes.parquet")
 p23_all = allp[(allp.election_year == 2023) & (allp.place_kind != "total")]
 p23_ord = allp[(allp.election_year == 2023) & allp.place_kind.isin(ORD)]
-p26_ord = vote_scope.load("stg_party_votes", "ordinary", COUNT_STAGE)
+p26_ord = vote_scope.load("stg_party_votes", "ordinary", "preliminary")   # ordinary-only 2026 exists for the preliminary count only
 p26_ord = p26_ord[p26_ord.election_year == 2026]
 p26_cfg = vote_scope.load("stg_party_votes", VOTE_SCOPE, COUNT_STAGE)
 p26_cfg = p26_cfg[p26_cfg.election_year == 2026]
+if COUNT_STAGE == "final" and VOTE_SCOPE == "all":     # the staged final rows must reproduce the official national shares exactly
+    import etl
+    nat = pd.read_csv(etl.NATIONAL_2026_FINAL)
+    off = nat.assign(party=nat.party.map(etl.clean_party).map(canon)).groupby("party").party_votes.sum()
+    off = off / off.sum() * 100
+    got = p26_cfg.assign(party=p26_cfg.party.map(canon)).groupby("party").votes.sum()
+    assert np.allclose((got / got.sum() * 100).reindex(off.index), off), "final 2026 national shares differ from the official table"
 
 def pshare(df, general_only=False):
     if general_only:
@@ -255,6 +263,7 @@ def pshare(df, general_only=False):
     t = df.assign(party=df.party.map(canon)).groupby("party").votes.sum()
     return t / t.sum() * 100
 
+LIKE = COUNT_STAGE == "final" and VOTE_SCOPE == "all"   # 2026 includes special votes, as 2023 does: compare all votes
 cols = {
     "2023 official (all votes)": pshare(p23_all),
     "2023 ordinary": pshare(p23_ord),
@@ -262,6 +271,9 @@ cols = {
     "general roll 2023 ordinary": pshare(p23_ord, True),
     "general roll 2026 ordinary": pshare(p26_ord, True),
 }
+if LIKE:
+    cols["general roll 2023 (all votes)"] = pshare(p23_all, True)
+    cols["general roll 2026 final (all votes)"] = pshare(p26_cfg, True)
 nat_file = ROOT / "data/reference/national_party_share_history.csv"
 if nat_file.exists():
     h = pd.read_csv(nat_file).assign(party=lambda d: d.party.map(canon)).pivot_table(index="party", columns="election_year", values="share")
@@ -275,17 +287,18 @@ chk23 = pshare(allp[(allp.election_year == 2023) & (allp.place_kind == "total")]
 assert np.allclose(chk23.reindex(cols["2023 official (all votes)"].index), cols["2023 official (all votes)"]), "2023 national does not reconcile"
 
 # Seat swing 2023 -> 2026 (ordinary votes both years) minus each benchmark's swing; negative = the seat did worse
-ord23 = cmp23["ordinary"].unstack("party").reindex(columns=[canon(p) for p in MAIN])
+ord23 = cmp23["all votes" if LIKE else "ordinary"].unstack("party").reindex(columns=[canon(p) for p in MAIN])
 ord23.columns = MAIN
 s26 = grp[2026].unstack("group")[MAIN]
 seat_sw = s26 - ord23.reindex(s26.index)
 def bench_sw(a, b):
     return (b - a).reindex([canon(p) for p in MAIN]).set_axis(MAIN)
-nat_sw = bench_sw(pshare(p23_ord), pshare(p26_ord))
-gen_sw = bench_sw(pshare(p23_ord, True), pshare(p26_ord, True))
-if not (VOTE_SCOPE == "ordinary" and COUNT_STAGE == "preliminary"):
-    print("note: seat 2026 shares follow VOTE_SCOPE/COUNT_STAGE but the benchmarks use ordinary votes; re-check after loading final results")
-print("Swing 2023→2026, ordinary votes. The two benchmarks' own swings (points):")
+b23, b26 = (p23_all, p26_cfg) if LIKE else (p23_ord, p26_ord)
+nat_sw = bench_sw(pshare(b23), pshare(b26))
+gen_sw = bench_sw(pshare(b23, True), pshare(b26, True))
+if not LIKE and not (VOTE_SCOPE == "ordinary" and COUNT_STAGE == "preliminary"):
+    print("note: seat 2026 shares follow VOTE_SCOPE/COUNT_STAGE but the benchmarks use ordinary votes; use ordinary/preliminary or all/final")
+print(f"Swing 2023→2026, {'all votes (2026 final)' if LIKE else 'ordinary votes'}. The two benchmarks' own swings (points):")
 display(pd.DataFrame({"national": nat_sw, "general roll": gen_sw}).rename(index=SHORT).T.round(1))
 print("Seat swing minus NATIONAL swing:")
 display((seat_sw - nat_sw).rename(columns=SHORT).round(1))

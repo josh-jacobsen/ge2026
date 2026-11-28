@@ -21,8 +21,10 @@
 # * Both the **party vote** and the **candidate vote** (each candidate counted for their party).
 #
 # **Read with care**
-# * 2026 is the preliminary count, **ordinary votes only**: special votes are not in yet (hollow points on the charts).
-#   Section 6 measures what leaving them out does to the blocs, using 2023 where both exist.
+# * 2026 follows `VOTE_SCOPE` / `COUNT_STAGE`: currently the **final count, all votes** (solid points). With the preliminary
+#   ordinary-only count the 2026 points are hollow, and section 6 measures what leaving special votes out does to the blocs.
+#   Sections 5 and 7 compare **ordinary votes** in both years (the only basis with voting-place detail) using the preliminary count;
+#   section 7 also has the all-votes comparison against the official final result.
 # * Boundaries changed (section 8): Upper Harbour was redrawn for 2020, and all four seats for 2026.
 # * Bloc colours are deliberately not party colours: teal = left bloc, orange = right bloc.
 # * Seat-level shares over four elections describe what happened; they do not explain why.
@@ -37,8 +39,8 @@ import numpy as np, pandas as pd
 import matplotlib.pyplot as plt
 import electorates, focus_history as fh, plotstyle, vote_scope
 
-VOTE_SCOPE = "ordinary"      # 2026 votes counted: "ordinary" or "all" (adds special + overseas)
-COUNT_STAGE = "preliminary"  # 2026 count: "preliminary" or "final"
+VOTE_SCOPE = "all"      # 2026 votes counted: "ordinary" or "all" (adds special + overseas)
+COUNT_STAGE = "final"  # 2026 count: "preliminary" or "final"
 SEATS = ["North Shore", "Northcote", "East Coast Bays", "Upper Harbour"]
 YEARS = fh.YEARS
 PROVISIONAL_2026 = not (VOTE_SCOPE == "all" and COUNT_STAGE == "final")
@@ -126,7 +128,7 @@ plt.tight_layout(); plt.show()
 # Change in each party's share of the party vote (ordinary votes in both years, so special votes do not distort it).
 
 # %%
-pv = vote_scope.load("stg_party_votes", "ordinary", COUNT_STAGE)
+pv = vote_scope.load("stg_party_votes", "ordinary", "preliminary")   # ordinary-only 2026 exists for the preliminary count only
 pv = pv[pv.electorate.isin(SEATS)]
 pv = pv[pv.election_year.isin([2023, 2026])]
 # 2023 here is also ordinary-only (vote_scope.load returns 2023 ordinary rows for scope "ordinary")
@@ -166,7 +168,7 @@ roll = pd.read_csv(ROOT / "data/reference/electorate_relationships_2026.csv").se
 maori = set(roll[roll == "maori"].index)
 ORD = ["advance", "election_day"]
 raw = pd.read_parquet(ROOT / "data/staging/stg_party_votes.parquet")
-raw26 = vote_scope.load("stg_party_votes", "ordinary", COUNT_STAGE)
+raw26 = vote_scope.load("stg_party_votes", "ordinary", "preliminary")
 
 def nat_blocs(df, general_only=False):
     if general_only:
@@ -196,6 +198,33 @@ seat_ord["general-roll lead swing"] = nat_tbl.loc["lead (Left - Right)", "genera
 seat_ord["vs national"] = seat_ord["seat swing in lead"] - seat_ord["national lead swing"]
 seat_ord["vs general roll"] = seat_ord["seat swing in lead"] - seat_ord["general-roll lead swing"]
 display(seat_ord.reindex(SEATS).round(1))
+
+# %% [markdown]
+# **Like-for-like with the final count.** When `VOTE_SCOPE="all"` and `COUNT_STAGE="final"`, 2026 includes special votes just as
+# the official 2023 figures do, so the comparison below is all votes in both years (no ordinary-only caveat).
+
+# %%
+if VOTE_SCOPE == "all" and COUNT_STAGE == "final":
+    all26 = vote_scope.load("stg_party_votes", "all", "final")
+    all26 = all26[all26.election_year == 2026]
+    cols_f = {
+        "2023 official (all votes)": nat_tbl["2023 official (all votes)"],
+        "2026 official (final)": nat_blocs(all26),
+        "general roll 2023 (all votes)": nat_blocs(raw[(raw.election_year == 2023) & (raw.place_kind != "total")], True),
+        "general roll 2026 (final)": nat_blocs(all26, True),
+    }
+    nat_f = pd.DataFrame(cols_f).loc[[LEFT, RIGHT, "Other", "lead (Left - Right)"]]
+    display(nat_f.round(1))
+    lead = party_b["lead (Left - Right)"].unstack("election_year")
+    seat_f = pd.DataFrame({2023: lead[2023], 2026: lead[2026]})
+    seat_f["seat swing in lead"] = seat_f[2026] - seat_f[2023]
+    seat_f["national lead swing"] = nat_f.loc["lead (Left - Right)", "2026 official (final)"] - nat_f.loc["lead (Left - Right)", "2023 official (all votes)"]
+    seat_f["general-roll lead swing"] = nat_f.loc["lead (Left - Right)", "general roll 2026 (final)"] - nat_f.loc["lead (Left - Right)", "general roll 2023 (all votes)"]
+    seat_f["vs national"] = seat_f["seat swing in lead"] - seat_f["national lead swing"]
+    seat_f["vs general roll"] = seat_f["seat swing in lead"] - seat_f["general-roll lead swing"]
+    display(seat_f.reindex(SEATS).round(1))
+else:
+    print("final count not selected: skipped")
 
 # %% [markdown]
 # ## 8. Boundaries

@@ -4,7 +4,8 @@
              "all"      = every vote counted: ordinary + mobile teams + special + overseas (everything except the
                           'total' rows). Special and overseas votes belong to an electorate, not a voting place, so
                           they can only feed electorate-level results, never voting-place maps.
-* ``stage``  which 2026 count: "preliminary" (data/raw/ge2026) or "final" (data/raw/ge2026_final).
+* ``stage``  which 2026 count: "preliminary" (data/raw/ge2026) or "final" (data/raw/ge2026_final/out.csv: one row per
+             electorate and party/candidate, special votes included, no voting places, so it only serves scope "all").
              2023 results are final and always included.
 
 ``load`` refuses to run when the choice would silently give a misleading answer, e.g. scope "all" before special
@@ -21,7 +22,7 @@ from places import ORDINARY
 
 STAGING = Path(__file__).resolve().parents[1] / "data" / "staging"
 SCOPES = ("ordinary", "all")
-SPECIAL_KINDS = ("special", "overseas")
+SPECIAL_KINDS = ("special", "overseas", "electorate_total")  # electorate_total (final out.csv) already includes them
 
 
 def load(table: str = "stg_party_votes", scope: str = "ordinary", stage: str = "preliminary", staging: Path = STAGING) -> pd.DataFrame:
@@ -35,7 +36,13 @@ def load(table: str = "stg_party_votes", scope: str = "ordinary", stage: str = "
     if not (df.election_year == 2026).any():
         raise ValueError(f"no 2026 {stage} results in {table}: add them to data/raw/{'ge2026_final' if stage == 'final' else 'ge2026'} and re-run notebook 01")
     if scope == "ordinary":
-        return df[df.place_kind.isin(ORDINARY)].reset_index(drop=True)
+        out = df[df.place_kind.isin(ORDINARY)].reset_index(drop=True)
+        if not (out.election_year == 2026).any():
+            raise ValueError(
+                f"no ordinary-vote rows for 2026 {stage}: the final results are electorate totals including special votes "
+                "(data/raw/ge2026_final/out.csv), so use scope 'all', or stage 'preliminary' for ordinary votes"
+            )
+        return out
     for year, d in df.groupby("election_year"):
         if not d.place_kind.isin(SPECIAL_KINDS).any():
             raise ValueError(

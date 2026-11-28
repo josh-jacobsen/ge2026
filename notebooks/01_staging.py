@@ -73,6 +73,19 @@ assert (chk3["diff"] == 0).all(), "2026 party totals differ from the published n
 print(f"{len(chk3)} parties match; national total {int(chk3.staging_votes.sum()):,}")
 
 # %% [markdown]
+# ## Third check: final 2026 count (`data/raw/ge2026_final/out.csv`)
+# The final file has one row per electorate and party / candidate (special votes included, no voting places), staged with
+# `place_kind = "electorate_total"`. Party votes summed over the 71 electorates must equal the Commission's official national table
+# (`data/raw/ge2026_final/_turnout/`). `tests/official_results/test_2026_final_out_csv.py` runs the fuller set of checks.
+
+# %%
+chk5 = etl.checks_party_totals(tables, 2026, "final")
+display(chk5)
+assert not chk5[["party_votes", "staging_votes"]].isna().any().any(), "party present on only one side"
+assert (chk5["diff"] == 0).all(), "final 2026 party totals differ from the official national table"
+print(f"{len(chk5)} parties match; national total {int(chk5.staging_votes.sum()):,}")
+
+# %% [markdown]
 # ## What is in each election?
 # 2026 is **preliminary, ordinary votes only** (no special/overseas votes), so compare
 # `advance` + `election_day` rows only. 2023 includes special votes as separate `place_kind`s.

@@ -1,7 +1,8 @@
 # %% [markdown]
 # # 04 – 2026 vs 2023 analysis
-# Like-for-like: **ordinary votes only** (`advance` + `election_day`), because 2026 is preliminary and has no
-# special votes. Change `FOCUS` to look at any party.
+# Electorate-level sections 1-2 follow `VOTE_SCOPE` / `COUNT_STAGE` (currently all votes, final 2026 count, special votes included).
+# The voting-place sections (3+) stay **ordinary votes only** (`advance` + `election_day`, `PLACE_STAGE`), because special votes
+# have no location and the final results have no voting-place detail yet. Change `FOCUS` to look at any party.
 #
 # Two ways to compare, because the 2025 boundary review changed the electorates:
 # * **Electorate level**: matched by name, with the Commission's 2025 rename list for the 10 renamed seats (boundaries of many moved).
@@ -24,8 +25,8 @@ import places, maps, vote_scope
 
 ST = ROOT / "data/staging"
 FOCUS = "Green Party"
-VOTE_SCOPE = "ordinary"    # electorate-level sections 1-2 only: "ordinary" or "all" (adds special + overseas; needs final data)
-COUNT_STAGE = "preliminary"  # 2026 count for sections 1-2: "preliminary" or "final"
+VOTE_SCOPE = "all"    # electorate-level sections 1-2 only: "ordinary" or "all" (adds special + overseas; needs final data)
+COUNT_STAGE = "final"  # 2026 count for sections 1-2: "preliminary" or "final"
 PLACE_STAGE = "preliminary"  # voting-place sections 3+ are ordinary votes only: specials have no location
 MIN_VOTES = 100        # ignore tiny venues: shares are noisy (and < 6 votes are zeroed by the Commission)
 MAP_MIN_VOTES = 1       # maps show every geocoded venue with at least this many votes, in whichever year it existed

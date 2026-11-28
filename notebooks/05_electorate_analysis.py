@@ -12,8 +12,9 @@
 
 # %% [markdown]
 # # 05 – Electorate-level analysis
-# One row per electorate, party vote only, **ordinary votes** (`advance` + `election_day`) so 2026 (preliminary)
-# and 2023 are like-for-like. Needs notebook 01 and 02 only: no geocoding.
+# One row per electorate, party vote only. `VOTE_SCOPE` / `COUNT_STAGE` choose the basis: currently **all votes, final 2026 count**
+# (`data/raw/ge2026_final/out.csv`, special votes included, like 2023's all votes). Use `"ordinary"` / `"preliminary"` for the
+# ordinary-votes-only view. Needs notebook 01 and 02 only: no geocoding.
 #
 # 2023 → 2026 change is shown for every electorate, matched by name. The 10 seats renamed in the 2025 boundary review
 # are matched to their main 2023 predecessor (Commission's list, `electorates.PREDECESSOR`). Many seats were also
@@ -32,8 +33,8 @@ import matplotlib.pyplot as plt
 import vote_scope
 
 FOCUS = "Green Party"
-VOTE_SCOPE = "ordinary"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
-COUNT_STAGE = "preliminary"  # 2026 count: "preliminary" or "final" (data/raw/ge2026_final)
+VOTE_SCOPE = "all"    # "ordinary" (advance + election day) or "all" (adds special + overseas votes)
+COUNT_STAGE = "final"  # 2026 count: "preliminary" or "final" (data/raw/ge2026_final)
 TOP_N = 15             # rows in the ranking charts
 HEATMAP_PARTIES = 8    # biggest parties nationally in 2026
 pd.set_option("display.width", 200, "display.max_columns", 30, "display.max_rows", 100)
